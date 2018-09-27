@@ -1,0 +1,45 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroud" >
+
+    <LinearLayout
+        android:id="@+id/join_ll"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/home_btn_height"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:weightSum="2" >
+
+        <Button
+            android:id="@+id/join_free"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@anim/button_left_selector"
+            android:text="@string/home_left"
+            android:textColor="@color/login_button_enable"
+            android:textSize="@dimen/home_btn_size"
+            android:typeface="sans" />
+
+        <Button
+            android:id="@+id/join_credit"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@anim/button_right_selector"
+            android:text="@string/home_right"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/home_btn_size"
+            android:typeface="sans" />
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/banners"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/join_ll" />
+
+</RelativeLayout>

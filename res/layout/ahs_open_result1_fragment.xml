@@ -1,0 +1,142 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ahs_fragment_bg"
+    android:orientation="vertical"
+    android:weightSum="7" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="5"
+        android:background="@drawable/bg_miniwhit4"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/fragment_title_h_margin"
+            android:layout_marginTop="@dimen/fragment_title_h_margin"
+            android:text="@string/history_list"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/fragment_title_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/result_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/fragment_des_size" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginBottom="@dimen/keyboard_v_margin"
+            android:layout_marginEnd="@dimen/listview_h_margin"
+            android:layout_marginStart="@dimen/listview_h_margin"
+            android:layout_marginTop="@dimen/keyboard_v_margin"
+            android:background="@color/action_bar_bg_color" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/listview_h_margin"
+            android:layout_marginStart="@dimen/listview_h_margin"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="3" >
+
+            <TextView
+                android:id="@+id/result_type"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="left"
+                android:text="@string/type_package1"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/phone_number_size" />
+
+            <TextView
+                android:id="@+id/result_weight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/history_credit"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/phone_number_size" />
+
+            <TextView
+                android:id="@+id/result_sum"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="@string/history_credit"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/phone_number_size" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginBottom="@dimen/keyboard_v_margin"
+            android:layout_marginEnd="@dimen/listview_h_margin"
+            android:layout_marginStart="@dimen/listview_h_margin"
+            android:layout_marginTop="@dimen/keyboard_v_margin"
+            android:background="@color/action_bar_bg_color" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/listview_h_margin"
+            android:layout_marginStart="@dimen/listview_h_margin"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="2" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="left"
+                android:text="@string/history_total"
+                android:textColor="@color/action_bar_bg_color"
+                android:textSize="@dimen/phone_number_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/total_credit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="@string/history_credit"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/phone_number_size"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/open_finish"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="@dimen/button_height"
+            android:layout_gravity="center"
+            android:background="@anim/button_dark_selector"
+            android:text="@string/done"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/phone_number_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

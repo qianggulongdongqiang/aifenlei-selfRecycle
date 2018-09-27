@@ -1,0 +1,142 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ahs_fragment_bg"
+    android:orientation="vertical"
+    android:weightSum="37" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/result_open"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/fragment_title_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="15"
+        android:background="@drawable/bg_miniwhit1"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_account"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_owner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/def_text_color"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_ava_point"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_credit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_all_point"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_total"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="16"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/fragement_tips_margin_top"
+            android:gravity="center"
+            android:text="@string/result_tip"
+            android:textColor="@color/msg_grey"
+            android:textSize="@dimen/fragment_tips_size" />
+
+        <Button
+            android:id="@+id/result_finish"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/fragment_title_h_margin"
+            android:background="@anim/button_dark_selector"
+            android:text="@string/dialog_result_return"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/phone_number_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,107 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_yellow"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/login_barcode_margin"
+        android:orientation="horizontal"
+        android:weightSum="3" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/status_bar_start"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:typeface="sans" />
+
+        <TextView
+            android:id="@+id/work_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingTop="@dimen/login_title_margin"
+            android:text="@string/status_bar_work1"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:typeface="sans" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:paddingTop="@dimen/login_title_margin"
+            android:text="@string/status_bar_end"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:typeface="sans" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/top_v_margin"
+        android:layout_marginTop="@dimen/top_v_margin" >
+
+        <ImageView
+            android:id="@+id/open_step2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/done"
+            android:src="@drawable/icon_uncompleted" />
+
+        <ImageView
+            android:id="@+id/open_step1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/open_top_s_margin"
+            android:contentDescription="@string/done"
+            android:src="@drawable/icon_completed" />
+
+        <ImageView
+            android:id="@+id/open_step3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="@dimen/open_top_e_margin"
+            android:contentDescription="@string/done"
+            android:src="@drawable/icon_uncompleted" />
+
+        <ImageView
+            android:id="@+id/open_step1_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/count_down_h_paddding"
+            android:layout_marginStart="@dimen/count_down_h_paddding"
+            android:layout_toLeftOf="@id/open_step2"
+            android:layout_toRightOf="@id/open_step1"
+            android:contentDescription="@string/done"
+            android:src="@drawable/line1" />
+
+        <ImageView
+            android:id="@+id/open_step2_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginEnd="@dimen/count_down_h_paddding"
+            android:layout_marginStart="@dimen/count_down_h_paddding"
+            android:layout_toLeftOf="@id/open_step3"
+            android:layout_toRightOf="@id/open_step2"
+            android:contentDescription="@string/done"
+            android:src="@drawable/line2" />
+    </RelativeLayout>
+
+</LinearLayout>

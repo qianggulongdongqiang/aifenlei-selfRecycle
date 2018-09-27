@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <dimen name="actionbar_height">240dp</dimen>
+    <dimen name="login_barcode_size">160dp</dimen>
+    <dimen name="login_barcode_margin">40dp</dimen>
+    <dimen name="login_title_width">335dp</dimen>
+    <dimen name="login_title_height">45dp</dimen>
+    <dimen name="top_v_margin">10dp</dimen>
+    <dimen name="login_title_margin">0dp</dimen>
+    <dimen name="login_back_width">240dp</dimen>
+    <dimen name="count_down_width">120dp</dimen>
+    <dimen name="login_back_height">88dp</dimen>
+    <dimen name="login_back_margin_top">60dp</dimen>
+    <dimen name="login_logo_width">456dp</dimen>
+    <dimen name="login_title_width2">333dp</dimen>
+    <dimen name="fragement_margin_horizon">65dp</dimen>
+    <dimen name="fragement_height">1100dp</dimen>
+    <dimen name="fragement_qrcode_width">500dp</dimen>
+    <dimen name="fragement_qrcode_height">390dp</dimen>
+    <dimen name="fragement_switch_height">120dp</dimen>
+    <dimen name="fragement_tips_margin_top">48dp</dimen>
+    <dimen name="fragement_tips_padding">19dp</dimen>
+    <dimen name="fragement_tips_height">50dp</dimen>
+    <dimen name="fragement_open_pic_width">579dp</dimen>
+    <dimen name="fragement_open_pic_height">346dp</dimen>
+    <dimen name="count_down_v_paddding">14dp</dimen>
+    <dimen name="count_down_h_paddding">6dp</dimen>
+    <dimen name="count_down_horizon">26dp</dimen>
+    <dimen name="list_text_margin">7dp</dimen>
+    <dimen name="edit_text_height">120dp</dimen>
+    <dimen name="edit_text_h_margin">132dp</dimen>
+    <dimen name="keyboard_height">120dp</dimen>
+    <dimen name="keyboard_preview_height">252dp</dimen>
+    <dimen name="keyboard_v_gap">12dp</dimen>
+    <dimen name="keyboard_h_margin">73dp</dimen>
+    <dimen name="keyboard_v_margin">30dp</dimen>
+    <dimen name="button_width">630dp</dimen>
+    <dimen name="button_height">120dp</dimen>
+    <dimen name="button_h_margin">70dp</dimen>
+    <dimen name="home_btn_height">150dp</dimen>
+    <dimen name="enter_btn_size">70dp</dimen>
+    <dimen name="open_top_s_margin">170dp</dimen>
+    <dimen name="open_top_e_margin">180dp</dimen>
+    <dimen name="listview_divider">2dp</dimen>
+    <dimen name="listview_h_margin">100dp</dimen>
+    <dimen name="fragment_title_h_margin">100dp</dimen>
+    <dimen name="fragment_title_h_padding">20dp</dimen>
+
+
+    <dimen name="account_height">60dp</dimen>
+    <dimen name="login_margin_right">10dp</dimen>
+    <dimen name="layout_margin">16dp</dimen>
+    <dimen name="layout_bottom_margin">5dp</dimen>
+    <dimen name="info_layout_height">100dp</dimen>
+    <dimen name="info_collect_margin">10dp</dimen>
+    <dimen name="info_right_title_margin">2dp</dimen>
+    <dimen name="collect_layout_margin">6dp</dimen>
+    <dimen name="collect_layout_height">386dp</dimen>
+    <dimen name="collect_main_height">350dp</dimen>
+    <dimen name="collect_item_height">112dp</dimen>
+    <dimen name="collect_layout_marging_top">0dp</dimen>
+    <dimen name="weight_content_height">150dp</dimen>
+    <dimen name="viewpager_indicator_height">25dp</dimen>
+    <dimen name="viewpager_indicator_round_size">12dp</dimen>
+    <dimen name="viewpager_indicator_width">10dp</dimen>
+    <dimen name="gridview_columnwidth">112dp</dimen>
+    <dimen name="gridview_item_width">112dp</dimen>
+
+    <dimen name="dot_line_height">100dp</dimen>
+    <dimen name="dot_line_padding">-45dp</dimen>
+
+    <dimen name="weight_title_height">104dp</dimen>
+    <dimen name="weight_title_margin">2dp</dimen>
+    <dimen name="weight_left_width">175dp</dimen>
+    <dimen name="weight_right_width">175dp</dimen>
+    <dimen name="weight_left_title_margin">5dp</dimen>
+    <dimen name="weight_left_info_margin">5dp</dimen>
+    <dimen name="weight_right_info_margin">0dp</dimen>
+    <dimen name="weight_right_btn_margin">0dp</dimen>
+    <dimen name="weight_piece_btn_margin">15dp</dimen>
+
+    <!--     home -->
+    <dimen name="image_left_margin">5dp</dimen>
+    <dimen name="image_top_margin">10dp</dimen>
+
+    <!--     exchange -->
+    <dimen name="viewpager_margin_top">-10dp</dimen>
+    <dimen name="viewpager_height">386dp</dimen>
+    <dimen name="exchange_main_height">370dp</dimen>
+    <dimen name="exchange_viewpager_height">350dp</dimen>
+    <dimen name="exchange_main_margin_top">30dp</dimen>
+    <dimen name="exchange_main_margin_bot">30dp</dimen>
+    <dimen name="round_size">24dp</dimen>
+
+    <dimen name="exchange_title_layout_height">120dp</dimen>
+    <dimen name="exchange_title_wh_height">30dp</dimen>
+
+    <!--     dialog -->
+    <dimen name="dialog_layout_width">320dp</dimen>
+    <dimen name="dialog_close_width">48dp</dimen>
+    <dimen name="dialog_close_half">24dp</dimen>
+    <dimen name="info_margin">30dp</dimen>
+    <dimen name="dialog_dot_margin">40dp</dimen>
+    <dimen name="dialog_dot_gap">10dp</dimen>
+    <dimen name="dialog_delete_width">24dp</dimen>
+    <dimen name="dialog_top_margin">30dp</dimen>
+    <dimen name="dialog_btn_width">100dp</dimen>
+    <dimen name="dialog_wel_btn_width">80dp</dimen>
+    <dimen name="dialog_btn_height">30dp</dimen>
+    <dimen name="dialog_btn_margin_bottom">40dp</dimen>
+    <dimen name="dialog_list_divider_height">10dp</dimen>
+    <dimen name="dialog_list_item_name_width">100dp</dimen>
+
+    <dimen name="actionbar_title_size">28sp</dimen>
+    <dimen name="actionbar_count_down_size">40sp</dimen>
+    <dimen name="actionbar_item_size">18sp</dimen>
+    <dimen name="fragment_main_title_size">30sp</dimen>
+    <dimen name="fragment_title_size">60sp</dimen>
+    <dimen name="fragment_des_size">40sp</dimen>
+    <dimen name="fragment_big_msg_size">70sp</dimen>
+    <dimen name="fragment_tips_size">35sp</dimen>
+    <dimen name="login_input_hint">22sp</dimen>
+    <dimen name="phone_input_hint">60sp</dimen>
+    <dimen name="phone_tips_size">35sp</dimen>
+    <dimen name="phone_number_size">50sp</dimen>
+    <dimen name="key_pre_size">80sp</dimen>
+    <dimen name="fragment_account_size">50sp</dimen>
+    <dimen name="home_btn_size">46sp</dimen>
+    <dimen name="finish_left_size">42sp</dimen>
+    <dimen name="finish_right_size">48sp</dimen>
+    <dimen name="info_left_title_size">18sp</dimen>
+    <dimen name="info_right_title_size">22sp</dimen>
+    <dimen name="weight_title_size">25sp</dimen>
+    <dimen name="left_msg_size">18sp</dimen>
+    <dimen name="left_small_size">21sp</dimen>
+    <dimen name="left_big_size">28sp</dimen>
+    <dimen name="right_msg_size">25sp</dimen>
+    <dimen name="dialog_weight_left">18sp</dimen>
+    <dimen name="dialog_weight_right">18sp</dimen>
+    <dimen name="dialog_welcome_title">16sp</dimen>
+
+    <integer name="num_columns">3</integer>
+</resources>
