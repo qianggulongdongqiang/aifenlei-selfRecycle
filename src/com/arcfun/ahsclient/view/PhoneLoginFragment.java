@@ -73,6 +73,8 @@ public class PhoneLoginFragment extends BaseLoginFragment implements
         if (mTask != null) {
             mTask.cancel(true);
         }
+        mInputNumber.setText("");//clear
+        mTips.setVisibility(View.INVISIBLE);
         LogUtils.d(TAG, "onHiddenChanged index = " + mIndex + "," + hidden);
     }
 
@@ -96,11 +98,12 @@ public class PhoneLoginFragment extends BaseLoginFragment implements
             @Override
             protected void onPostExecute(String result) {
                 if (result != null) {
-                    ownerInfo = Utils.parseLoginCode(result, number);
+                    ownerInfo = Utils.parseLoginCode(result);
                     if (ownerInfo != null) {
                         if (mListener != null) {
                             mListener.onUpdate(mIndex + 1, ownerInfo);
                         }
+                        mInputNumber.setText("");//clear
                         return;
                     }
                 }

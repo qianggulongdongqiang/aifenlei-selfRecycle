@@ -1,0 +1,9 @@
+<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/listview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:divider="@null"
+    android:dividerHeight="@dimen/list_spinner_padding"
+    android:listSelector="@drawable/listview_selector"
+    android:background="@drawable/rectangle_popup_bg"
+    android:scrollbars="none" />

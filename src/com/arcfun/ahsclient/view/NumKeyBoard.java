@@ -17,9 +17,22 @@ public class NumKeyBoard extends LinearLayout {
         public void onInput(int type);
     }
 
-    private EditText mEditText;
+    private EditText mEditText, mText;
     private OnInputDoneListener mListener;
     private static final int PHONE_LENGTH = 15;
+    private boolean isPassword = false;
+
+    public boolean isPassword() {
+        return isPassword;
+    }
+
+    public void setPassword(boolean isPassword) {
+        this.isPassword = isPassword;
+    }
+
+    public String getInput() {
+        return mText != null ? mText.getText().toString() : "";
+    }
 
     public NumKeyBoard(Context context) {
         this(context, null);
@@ -41,6 +54,7 @@ public class NumKeyBoard extends LinearLayout {
         kv.setKeyboard(kb);
         kv.setEnabled(true);
         kv.setOnKeyboardActionListener(mActionListener);
+        mText = new EditText(context);
     }
 
     public void setEditText(EditText et, OnInputDoneListener listener) {
@@ -85,6 +99,7 @@ public class NumKeyBoard extends LinearLayout {
         public void onKey(int primaryCode, int[] keyCodes) {
             if (mEditText != null) {
                 Editable editable = mEditText.getText();
+                Editable text = mText.getText();
                 int selectPos = mEditText.getSelectionStart();
 
                 if (primaryCode == Keyboard.KEYCODE_DONE) {
@@ -100,13 +115,26 @@ public class NumKeyBoard extends LinearLayout {
                             editable.delete(selectPos - 1, selectPos);
                         }
                     }
+                    if (text != null && text.length() > 0) {
+                        if (selectPos > 0) {
+                            text.delete(selectPos - 1, selectPos);
+                        }
+                    }
                 } else {
                     if (editable != null && editable.length() < PHONE_LENGTH) {
                         if (mListener != null) {
                             mListener.onInput(0);
                         }
-                        editable.insert(selectPos,
-                                Character.toString((char) primaryCode));
+                        if (isPassword) {
+                            editable.insert(selectPos, "*");
+                        } else {
+                            editable.insert(selectPos,
+                                    Character.toString((char) primaryCode));
+                        }
+                        if (text != null) {
+                            text.insert(selectPos,
+                                    Character.toString((char) primaryCode));
+                        }
                     } else {
                         if (mListener != null) {
                             mListener.onInput(-1);

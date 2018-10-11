@@ -16,7 +16,7 @@
             android:id="@+id/account_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/login_qr_title3"
+            android:text="@string/login_qr_title2"
             android:textColor="@color/action_bar_bg_color"
             android:textSize="@dimen/fragment_main_title_size"
             android:textStyle="bold" />
@@ -56,7 +56,7 @@
             android:id="@+id/account_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/login_qr_title3_msg"
+            android:text="@string/login_qr_title3"
             android:textColor="@color/dialog_default"
             android:textSize="@dimen/fragment_tips_size" />
 

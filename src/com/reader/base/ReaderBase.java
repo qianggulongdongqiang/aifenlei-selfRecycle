@@ -121,7 +121,7 @@ public abstract class ReaderBase {
             int nMarkIndex = 0; // 当数据中不存在HEAD时，nMarkIndex等于数据组最大索引
             for (int nLoop = 0; nLoop < btAryBuffer.length; nLoop++) {
                 if (btAryBuffer.length > nLoop + 1) {
-                    if (btAryBuffer[nLoop] == CMD.HEAD) {
+                    if (btAryBuffer[nLoop] == CMD.HEAD1) {
                         int nLen = btAryBuffer[nLoop + 1] & 0xFF;
                         if (nLoop + 1 + nLen < btAryBuffer.length) {
                             byte[] btAryAnaly = new byte[nLen + 2];
@@ -129,12 +129,25 @@ public abstract class ReaderBase {
                                     nLen + 2);
 
                             analyData(btAryAnaly);
-                            sendCMDResponse(btAryAnaly);// add
 
                             nLoop += 1 + nLen;
                             nIndex = nLoop + 1;
                         } else {
                             nLoop += 1 + nLen;
+                        }
+                    } else if (btAryBuffer[nLoop] == CMD.HEAD2) {
+                        int nLen = 21;
+                        if (nLoop + nLen < btAryBuffer.length) {
+                            byte[] btAryAnaly = new byte[nLen + 1];
+                            System.arraycopy(btAryBuffer, nLoop, btAryAnaly, 0,
+                                    nLen + 1);// +1 is BEG
+
+                            analyData(btAryAnaly);
+
+                            nLoop += nLen;
+                            nIndex = nLoop + 1;// +1 move to END index
+                        } else {
+                            nLoop += nLen;
                         }
                     } else if (btAryBuffer[nLoop] == CMD.BEG) {
                         int nLen = 7;
@@ -212,14 +225,8 @@ public abstract class ReaderBase {
         return 0;
     }
 
-    /*private int sendMessage(byte btCmd, byte[] btAryData) {
-        MessageTran msgTran = new MessageTran(btCmd, btAryData);
-
-        return sendMessage(msgTran.getAryTranData());
-    }*/
-
     /**
-     * open house。
+     * open house
      * 
      * @param btAryBuf
      *            to send

@@ -89,10 +89,10 @@ public class StringTool {
         int i;
 
         for (i = 0; i < bytes.length; i++) {
-            if (((int) bytes[i] & 0xff) < 0x10) {
+            if ((bytes[i] & 0xff) < 0x10) {
                 buf.append("0");
             }
-            buf.append(Long.toString((int) bytes[i] & 0xff, 16));
+            buf.append(Long.toString(bytes[i] & 0xff, 16));
         }
         return buf.toString().toUpperCase();
     }
@@ -112,7 +112,8 @@ public class StringTool {
         return hexString;
     }
 
-    public static String decodeQrBytes(byte[] rawBytes) {
+    /** used to decode Qr */
+    public static String decodeBytes(byte[] rawBytes) {
         String bytes = encodeHex(rawBytes);
         String hexString = "0123456789ABCDEF";
         ByteArrayOutputStream baos = new ByteArrayOutputStream(
@@ -122,6 +123,22 @@ public class StringTool {
                     .indexOf(bytes.charAt(i + 1))));
         hexString = new String(baos.toByteArray());
         return hexString;
+    }
+
+    /** used to decode Epc */
+    public static String decodeBytes(byte[] rawBytes, int start, int length) {
+        if (length > rawBytes.length) {
+            length = rawBytes.length;
+        }
+        String bytes = encodeHex(rawBytes);
+        String hexString = "0123456789ABCDEF";
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(
+                bytes.length() / 2);
+        for (int i = 0; i < bytes.length(); i += 2)
+            baos.write((hexString.indexOf(bytes.charAt(i)) << 4 | hexString
+                    .indexOf(bytes.charAt(i + 1))));
+        hexString = new String(baos.toByteArray());
+        return hexString.substring(start, length);
     }
 
     /**

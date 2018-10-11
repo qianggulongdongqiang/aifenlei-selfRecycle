@@ -1,7 +1,6 @@
 package com.arcfun.ahsclient.view;
 
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.arcfun.ahsclient.R;
-import com.arcfun.ahsclient.net.HttpRequest;
 import com.arcfun.ahsclient.utils.LogUtils;
-import com.arcfun.ahsclient.utils.Utils;
-import com.reader.base.StringTool;
-import com.reader.helper.ReaderHelper;
-import com.reader.helper.ReaderHelper.Listener;
 
 public class RFIDLoginFragment extends BaseLoginFragment implements
-        OnClickListener, Listener {
+        OnClickListener {
     private static final String TAG = "RFID|Login";
     private OnActionCallBack mListener;
     private int mIndex;
@@ -55,26 +49,12 @@ public class RFIDLoginFragment extends BaseLoginFragment implements
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         LogUtils.d(TAG, "onActivityCreated " + mIndex);
-        try {
-            mReaderHelper2 = ReaderHelper.getEpcHelper();
-            initSerialPort2();
-            mReaderHelper2.setListener(this);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         LogUtils.d(TAG, "onHiddenChanged hidden = " + hidden);
-        if (hidden) {
-            closeSerialPort2();
-            mReaderHelper2.setListener(null);
-            getCustomerByRfids("");//TODO
-        } else {
-            initSerialPort2();
-        }
     }
 
     @Override
@@ -96,47 +76,4 @@ public class RFIDLoginFragment extends BaseLoginFragment implements
         }
     }
 
-    private void getCustomerByRfids(final String json) {
-        String url = HttpRequest.URL_HEAD + HttpRequest.GET_CUSTOMER_BY_RFIDS;
-        new AsyncTask<String, Void, String>() {
-            @Override
-            protected String doInBackground(String... params) {
-                byte[] data = HttpRequest.sendPost(params[0], json);
-                LogUtils.d(TAG, "customer data =" + data);
-                if (data == null) {
-                    return null;
-                }
-                String result = new String(data);
-                LogUtils.d(TAG, "customer:" + result);
-                return result;
-            }
-
-            @Override
-            protected void onPostExecute(String result) {
-            };
-        }.execute(url);
-    }
-
-    @Override
-    public void onLostConnect(int type) {
-        Utils.showMsg(getActivity(), "onLostConnect");
-    }
-
-    @Override
-    public void onRawInfo(int type, byte[] receiveData) {
-    }
-
-    @Override
-    public void onEPCInfo(int type, byte[] receiveData) {
-        String data = StringTool.byteArrayToString(receiveData, 0,
-                receiveData.length);
-        Utils.showMsg(getActivity(), "onEPCInfo:" + data);
-    }
-
-    @Override
-    public void onDEVInfo(int type, byte[] receiveData) {}
-
-    @Override
-    public void onQRCInfo(int type, byte[] btData) {
-    }
 }

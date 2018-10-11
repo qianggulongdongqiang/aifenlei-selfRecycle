@@ -40,7 +40,6 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
-import android.view.Gravity;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.Toast;
 import cn.jpush.android.api.JPushInterface;
@@ -84,10 +83,10 @@ public class Utils {
     public static final int BAUD_RATE_UHF = 115200;
 
     /** Serial Port */
-    public static final String SERIAL_PROT_1 = "/dev/ttyS1";//TODO
-    public static final String SERIAL_PROT_2 = "/dev/ttyS3";
-    public static final String SERIAL_PROT_3 = "/dev/ttyS3";
-    public static final String SERIAL_PROT_4 = "/dev/ttyS3";
+    public static final String SERIAL_PROT_1 = "/dev/ttyS2";//dev/ttyS2
+    public static final String SERIAL_PROT_2 = "/dev/ttyUSB0";//dev/ttyUSB0
+    public static final String SERIAL_PROT_3 = "/dev/ttyUSB1";//dev/ttyUSB1
+    public static final String SERIAL_PROT_4 = "/dev/ttyUSB2";//dev/ttyUSB2
 
     public static int MAX_GRID_VIEW_NUM = 9;
     public static int NUMBER_COLUMNS = 3;
@@ -159,7 +158,7 @@ public class Utils {
     public static void showMsg(Context context, String msg) {
         if (mToast == null) {
             mToast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
-            mToast.setGravity(Gravity.CENTER, 0, 0);
+            //mToast.setGravity(Gravity.CENTER, 0, 0);
         } else {
             mToast.setText(msg);
         }
@@ -169,7 +168,7 @@ public class Utils {
     public static void showMsg(Context context, CharSequence msg) {
         if (mToast == null) {
             mToast = Toast.makeText(context, msg, Toast.LENGTH_SHORT);
-            mToast.setGravity(Gravity.CENTER, 0, 0);
+            //mToast.setGravity(Gravity.CENTER, 0, 0);
         } else {
             mToast.setText(msg);
         }
@@ -179,11 +178,17 @@ public class Utils {
     public static void showMsg(Context context, int id) {
         if (mToast == null) {
             mToast = Toast.makeText(context, id, Toast.LENGTH_SHORT);
-            mToast.setGravity(Gravity.CENTER, 0, 0);
+            //mToast.setGravity(Gravity.CENTER, 0, 0);
         } else {
             mToast.setText(id);
         }
         mToast.show();
+    }
+
+    public static String getTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss a");
+        long time = System.currentTimeMillis();
+        return sdf.format(time);
     }
 
     public static boolean isEmpty(String s) {
@@ -275,13 +280,17 @@ public class Utils {
         return JPushInterface.getRegistrationID(context);
     }
 
-    public static String getImei(Context context, String imei) {
+    public static String getImei(Context context) {
+        String imei= "";
         try {
             TelephonyManager telephonyManager = (TelephonyManager) context
                     .getSystemService(Context.TELEPHONY_SERVICE);
             imei = telephonyManager.getDeviceId();
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
+        }
+        if (imei.isEmpty()) {
+            return getSerialNo();
         }
         return imei;
     }
@@ -461,7 +470,7 @@ public class Utils {
         return object.toString();
     }
 
-    public static OwnerInfo parseLoginCode(String json, String mobile) {
+    public static OwnerInfo parseLoginCode(String json) {
         OwnerInfo owner = null;
         try {
             JSONObject jsonObject = new JSONObject(json);
@@ -470,7 +479,8 @@ public class Utils {
                 JSONObject dataObject = jsonObject.getJSONObject("data");
                 owner = new OwnerInfo(dataObject.getInt("id"),
                         dataObject.getString("user_nickname"),
-                        dataObject.getInt("score"), mobile);
+                        dataObject.getInt("score"),
+                        dataObject.getString("mobile"));
             }
         } catch (Exception e) {
             LogUtils.e(TAG, "parseLoginCode:" + e.toString());
@@ -601,6 +611,19 @@ public class Utils {
             LogUtils.e(TAG, "parsePushCode:" + e.toString());
         }
         return null;
+    }
+
+    /** 10-normal;20-0ffline;30-exception;40-full */
+    public static String buildStateCode(String token, int state) {
+        JSONObject object = new JSONObject();
+        try {
+            object.put("token", token);
+            object.put("state", state);
+        } catch (Exception e) {
+            LogUtils.e(TAG, "buildStateCode:" + e.toString());
+        }
+        LogUtils.d(TAG, "buildStateCode:" + object.toString());
+        return object.toString();
     }
 
     public static void dumpJson2Db(Context context, byte[] data, String name) {
@@ -914,7 +937,7 @@ public class Utils {
     }
 
     public static float getWeight(String[] array) {
-        float weigth = 0;
+        float weigth = 0f;
         weigth = Integer.parseInt(array[4] + array[5], 16)/100f;
         System.out.println("getWeight=" + weigth);
         return weigth;

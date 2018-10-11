@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.arcfun.ahsclient"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.4" >
     <!-- jpush-android-3.1.6-release -->
 
     <uses-sdk
@@ -58,11 +58,6 @@
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name="com.arcfun.ahsclient.ui.WorkMainActivity"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity
-            android:name="com.arcfun.ahsclient.ui.HomeListActivity"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateAlwaysHidden" />

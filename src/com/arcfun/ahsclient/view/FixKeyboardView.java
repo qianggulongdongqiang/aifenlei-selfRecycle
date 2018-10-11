@@ -38,7 +38,7 @@ public class FixKeyboardView extends KeyboardView {
         List<Key> keys = getKeyboard().getKeys();
         for (Key key : keys) {
             if (key.codes[0] == Keyboard.KEYCODE_DONE) {
-                Drawable dr = (Drawable) mContext.getResources().getDrawable(
+                Drawable dr = mContext.getResources().getDrawable(
                         key.pressed ? R.drawable.button_enter0 : R.drawable.button_enter);
                 dr.setBounds(key.x, key.y, key.x + key.width, key.y
                         + key.height);
@@ -46,7 +46,7 @@ public class FixKeyboardView extends KeyboardView {
                 /*canvas.drawText(key.label.toString(), key.x + key.width / 3,
                         key.y + key.height / 2, mPaint);*/
             } else if (key.codes[0] == Keyboard.KEYCODE_DELETE) {
-                Drawable dr = (Drawable) mContext.getResources().getDrawable(
+                Drawable dr = mContext.getResources().getDrawable(
                         key.pressed ? R.drawable.button_delet0 : R.drawable.button_delet);
                 dr.setBounds(key.x, key.y, key.x + key.width, key.y
                         + key.height);

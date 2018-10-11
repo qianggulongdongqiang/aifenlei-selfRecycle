@@ -7,10 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.arcfun.ahsclient.R;
@@ -19,21 +23,46 @@ import com.arcfun.ahsclient.data.DeviceInfo;
 import com.arcfun.ahsclient.data.QrCode;
 import com.arcfun.ahsclient.data.ResultInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
+import com.arcfun.ahsclient.ui.GuestWelcomeDialog.OnChooseListener;
 import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.LogUtils;
 import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
+import com.reader.base.CMD;
+import com.reader.base.StringTool;
+import com.reader.helper.ReaderHelper.Listener;
 
 public class HomeMainActivity extends AhsBaseActivity implements
-        OnClickListener {
+        OnClickListener, OnChooseListener, OnLongClickListener, Listener {
     private static final String TAG = "Home";
     private Button mJoinFree, mJoinCredit;
     private ViewPager mViewPager;
     private BannerPagerAdapter mAdapter;
+    private LinearLayout mJoinLayout, mExceptionLayout;
     private List<String> mBannerList;
     private AsyncTask<String, Void, String> mTask;
+    private float mBaseWeight = 0f;
     private QrCode mCode;
     private String mToken;
+    private int mPageCount = 0;
+    private boolean isFull;
+
+    private int mDiffDownTime = 5 * 1000;
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+            case MSG_SCROLL_MSG:
+                int next = mViewPager.getCurrentItem() + 1;
+                mViewPager.setCurrentItem(mPageCount == 0 ? 0 : next
+                        % mPageCount);
+                startLoop(mDiffDownTime);
+                break;
+            }
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +76,40 @@ public class HomeMainActivity extends AhsBaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        isFull = SharedPreferencesUtils.getState(this) == 40;
+        updateState(isFull);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initSerialPort1();
+            }
+        }).start();
+        mReaderHelper1.setListener(this);
         requestSlideList(Utils.buildSlideListJson());
         if (!SharedPreferencesUtils.getRegister(this)) {
             requestSetPushCode(this, Utils.buildPushCode(mToken,
                     Utils.getRegistrationID(this)));
         }
-        LogUtils.d(TAG, "onResume " + mViewPager.getChildCount());
+        mPageCount = mBannerList.size();
+        LogUtils.d(TAG, "onResume " + mPageCount);
+        startLoop(mDiffDownTime);
+    }
+
+    private void updateState(boolean full) {
+        mJoinLayout.setVisibility(full ? View.GONE : View.VISIBLE);
+        mExceptionLayout.setVisibility(full ? View.VISIBLE : View.GONE);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        mReaderHelper1.setListener(null);
+        mHandler.removeMessages(MSG_SCROLL_MSG);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -72,17 +124,18 @@ public class HomeMainActivity extends AhsBaseActivity implements
         mBannerList = new ArrayList<String>();
         mToken = SharedPreferencesUtils.getToken(getApplicationContext());
         if (mToken.isEmpty()) {
-            requestLogin(Utils.buildLoginJson(Utils.getSerialNo()));
+            requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
         }
     }
 
     private void initView() {
+        mJoinLayout = (LinearLayout) findViewById(R.id.join_ll);
+        mExceptionLayout = (LinearLayout) findViewById(R.id.join_exception);
         mJoinFree = (Button) findViewById(R.id.join_free);
         mJoinCredit = (Button) findViewById(R.id.join_credit);
         mViewPager = (ViewPager) findViewById(R.id.banners);
         mAdapter = new BannerPagerAdapter(this, mBannerList);
         mViewPager.setAdapter(mAdapter);
-        //slowViewPager();
         mJoinFree.setOnClickListener(this);
         mJoinCredit.setOnClickListener(this);
     }
@@ -93,24 +146,36 @@ public class HomeMainActivity extends AhsBaseActivity implements
         case R.id.join_free:
             if (mToken.isEmpty()) {
                 Utils.showMsg(this, getResources().getString(R.string.network_exception));
-                return;
+                requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
+                if (!SharedPreferencesUtils.getDebug(this)) {
+                    return;
+                }
             }
-            Intent work = new Intent(this, WorkMainActivity.class);
-            work.putExtra("isGuest", true);
-            startActivity(work);
+            GuestWelcomeDialog dialog = new GuestWelcomeDialog(this);
+            dialog.show();
             break;
         case R.id.join_credit:
             if (mToken.isEmpty()) {
                 Utils.showMsg(this, getResources().getString(R.string.network_exception));
-                return;
+                requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
+                if (!SharedPreferencesUtils.getDebug(this)) {
+                    return;
+                }
             }
+            mHandler.removeMessages(MSG_SCROLL_MSG);
             Intent intent = new Intent(this, LoginMainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             break;
 
         default:
             break;
         }
+    }
+
+    public void startLoop(int delay) {
+        mHandler.removeMessages(MSG_SCROLL_MSG);
+        mHandler.sendEmptyMessageDelayed(MSG_SCROLL_MSG, delay);
     }
 
     protected void requestSlideList(final String json) {
@@ -145,9 +210,11 @@ public class HomeMainActivity extends AhsBaseActivity implements
                 }
                 banners = Utils.parseSlideList(result);
                 if (banners != null && banners.size() > 0) {
+                    mBannerList.clear();
                     for (String banner : banners) {
                         mBannerList.add(banner);
                     }
+                    mPageCount = mBannerList.size();
                     mAdapter.notifyDataSetChanged();
                 }
             }
@@ -248,4 +315,67 @@ public class HomeMainActivity extends AhsBaseActivity implements
             }
         }).start();
     }
+
+    @Override
+    public void onNext(int type) {
+        ((AhsApplication) getApplication()).setWeight(mBaseWeight);
+        if (type == 1) {
+            Intent work = new Intent(this, WorkMainActivity.class);
+            work.putExtra("isGuest", true);
+            work.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(work);
+        } else {
+            if (mToken.isEmpty()) {
+                Utils.showMsg(this, getResources().getString(R.string.network_exception));
+                requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
+                return;
+            }
+            Intent intent = new Intent(this, LoginMainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return true;
+    }
+
+    @Override
+    public void onLostConnect(int type) {}
+
+    @Override
+    public void onRawInfo(int type, byte[] btData) {}
+
+    @Override
+    public void onDEVInfo(int type, byte[] btData) {
+        String[] data = StringTool.encodeHexToArrays(btData);
+        handleDevInfo(data);
+    }
+
+    private void handleDevInfo(String[] data) {
+        if (data == null || data.length < Constancts.LENGTH_DEV) {
+            return;
+        }
+        if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1])) {
+            if (isFull != data[2].equals("01")) {
+                isFull = data[2].equals("01");
+                String token = SharedPreferencesUtils.getToken(this);
+                SharedPreferencesUtils.setState(this, 40);
+                requestSyncState(Utils.buildStateCode(token, 40));
+                updateState(isFull);
+            }
+        }
+        if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1])
+                || CMD.NAME_UNSOLICETD_WEIGHT.equals(data[1])) {
+            mBaseWeight = Utils.getWeight(data);
+        }
+    }
+
+    @Override
+    public void onEPCInfo(int type, byte[] btData) {}
+
+    @Override
+    public void onQRCInfo(int type, byte[] btData) {}
+
 }

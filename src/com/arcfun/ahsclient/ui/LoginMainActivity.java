@@ -1,17 +1,13 @@
 package com.arcfun.ahsclient.ui;
 
-import java.util.Arrays;
-
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.SparseArray;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +15,7 @@ import android.widget.Toast;
 
 import com.arcfun.ahsclient.R;
 import com.arcfun.ahsclient.data.OwnerInfo;
+import com.arcfun.ahsclient.net.HttpRequest;
 import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper.OnFinishListener;
@@ -37,12 +34,13 @@ import com.reader.base.StringTool;
 import com.reader.helper.ReaderHelper.Listener;
 
 public class LoginMainActivity extends AhsBaseActivity implements Listener,
-        OnFinishListener, OnActionCallBack, OnLongClickListener {
-    private ImageView mBar, mBack;
+        OnFinishListener, OnActionCallBack {
+    private ImageView mBack;
     private TextView mLable;
+    private AsyncTask<String, Void, String> mRFIDTask = null;
     /** rfid */
-    private RFIDEnsureFragment mRfidEnsureFragment;
     private RFIDLoginFragment mRFIDFragment;
+    private RFIDEnsureFragment mRfidEnsureFragment;
 
     /** wechat */
     private WeixinLoginFragment mWeixinFragment;
@@ -60,18 +58,18 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
     private OwnerInfo mInfo;
     /** 工控机的数据 */
     private SparseArray<Float> mWeight = new SparseArray<Float>();
+    private float mBaseWeight = 0f;
+    private byte[] mEpcData = null;
     private boolean isFull = false;
-    private boolean isDirty = false;
 
     public static final String POSITION = "position";
-    public static final int FRAGMENT_DEFAULT = 0;
-    public static final int FRAGMENT_LOGIN_RFID_1 = FRAGMENT_DEFAULT;
+    public static final int FRAGMENT_LOGIN_RFID_1 = 0;
     public static final int FRAGMENT_LOGIN_RFID_2 = 1;
-    public static final int FRAGMENT_LOGIN_RFID_3 = 2;
     public static final int FRAGMENT_LOGIN_WEIXIN_1 = 10;
     public static final int FRAGMENT_LOGIN_WEIXIN_2 = 11;
     public static final int FRAGMENT_LOGIN_PHONE_1 = 20;
     public static final int FRAGMENT_LOGIN_PHONE_2 = 21;
+    public static final int FRAGMENT_DEFAULT = FRAGMENT_LOGIN_WEIXIN_1;
     private int mPosition = FRAGMENT_DEFAULT;
     public static final int PERIOD = 200 * 1000;
     public static final int INTERVAL = 1 * 1000;
@@ -83,22 +81,17 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
         ((AhsApplication) getApplication()).addActivity(this);
         mManager = getSupportFragmentManager();
         initView();
-        initSerialPort1();
+        initSerialPort();
     }
 
     private void initView() {
         showFragment(FRAGMENT_DEFAULT);
         mBack = (ImageView) findViewById(R.id.login_back);
-        mBar = (ImageView) findViewById(R.id.title_barcode);
         mLable = (TextView) findViewById(R.id.barcode_text);
         mCountDown = (Button) findViewById(R.id.login_count_down);
         mHelper = new CountDownTimerHelper(mCountDown, PERIOD, INTERVAL);
         mHelper.setOnFinishListener(this);
         mBack.setOnClickListener(this);
-        if (Utils.DEBUG) {
-            mBar.setOnClickListener(this);
-            mBar.setOnLongClickListener(this);
-        }
     }
 
     @Override
@@ -108,6 +101,7 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
         mLable.setText(getString(R.string.title_des4, lable));
         mHelper.start();
         mReaderHelper1.setListener(this);
+        mReaderHelper2.setListener(this);
     }
 
     @Override
@@ -115,6 +109,7 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
         super.onPause();
         mHelper.stop();
         mReaderHelper1.setListener(null);
+        mReaderHelper2.setListener(null);
     }
 
     @Override
@@ -128,15 +123,10 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
     }
 
     @Override
-    public boolean onLongClick(View v) {
-        showFragment(getNextId(mPosition));
-        return true;
-    }
-
-    @Override
     public void onClick(View v) {
         switch (v.getId()) {
         case R.id.title_barcode:
+            requestLogin(Utils.buildLoginJson("002101000489", false));
             try {
                 mReaderHelper1.getReader().sendOpenHouse(true);
             } catch (Exception e) {
@@ -144,7 +134,7 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
             }
             break;
         case R.id.login_back:
-            if (mPosition == FRAGMENT_LOGIN_RFID_1) {
+            if (mPosition == FRAGMENT_DEFAULT) {
                 onBackPressed();
                 return;
             }
@@ -160,19 +150,15 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
     private int getLastId(int index) {
         switch (index) {
         case FRAGMENT_LOGIN_RFID_1:
-            return FRAGMENT_LOGIN_RFID_1;
+            return FRAGMENT_DEFAULT;
         case FRAGMENT_LOGIN_WEIXIN_1:
-            return FRAGMENT_LOGIN_RFID_1;
+            return FRAGMENT_DEFAULT;
         case FRAGMENT_LOGIN_PHONE_1:
-            return FRAGMENT_LOGIN_RFID_1;
+            return FRAGMENT_DEFAULT;
 
         default:
             return --index;
         }
-    }
-
-    private int getNextId(int index) {
-        return ++index;
     }
 
     @Override
@@ -188,34 +174,13 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
 
     @Override
     public void onEPCInfo(int type, byte[] epcData) {
-        String data[] = StringTool.encodeHexToArrays(epcData);
-        long time = System.currentTimeMillis();
-        String[] raw = new String[2];
-        Message msg = mHandler.obtainMessage(MSG_UPDATE_DEBUG);
-        raw[0] = "EPC time: " + time;
-        raw[1] = "\nlength=" + data.length + ", top=" + type + "\n" + Arrays.toString(data)
-                + "\n" + Arrays.toString(epcData);
-        msg.obj = raw;
-        msg.sendToTarget();
+        handleEpcInfo(epcData);
     }
 
     @Override
     public void onDEVInfo(int type, byte[] devData) {
         String[] data = StringTool.encodeHexToArrays(devData);
         handleDevInfo(data);
-        long time = System.currentTimeMillis();
-        Message msg = mHandler.obtainMessage(MSG_UPDATE_DEBUG);
-        String[] raw = new String[2];
-        raw[0] = "Dev time: " + time;
-        if (data[0].equals("58") && data[1].equals("03")) {
-            raw[1] = "\nlength=" + data.length + ", top=" + type + "\n" + Arrays.toString(data)
-                    + "\n" + Utils.getIndex(data) + ", " + Utils.getWeight(data);
-        } else {
-            raw[1] = "\nlength=" + data.length + ", top=" + type + "\n" + Arrays.toString(data)
-                    + "\n" + Arrays.toString(devData);
-        }
-        msg.obj = raw;
-        msg.sendToTarget();
     }
 
     @Override
@@ -227,29 +192,47 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
             return;
         }
         if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1])) {
+            mBaseWeight = Utils.getWeight(data);
             if (isFull != data[2].equals("01")) {
                 isFull = data[2].equals("01");
-                //TODO
-            }
-            if (isDirty != data[3].equals("01")) {
-                isDirty = data[3].equals("01");
-                //TODO
+                String token = SharedPreferencesUtils.getToken(this);
+                SharedPreferencesUtils.setState(this, 40);
+                requestSyncState(Utils.buildStateCode(token, 40));
             }
         } else if (CMD.NAME_UNSOLICETD_WEIGHT.equals(data[1])) {
+            mBaseWeight = Utils.getWeight(data);
             mWeight.append(Utils.getIndex(data), Utils.getWeight(data));
+        }
+    }
+
+    private void handleEpcInfo(byte[] epcData) {
+        if (epcData != null && epcData.length == Constancts.LENGTH_EPC) {
+            if (mEpcData != epcData && mPosition == FRAGMENT_LOGIN_RFID_1) {
+                mEpcData = epcData;
+                try {
+                    requestLogin(Utils.buildLoginJson(
+                            StringTool.decodeBytes(epcData, 1, 13), false));
+                } catch (Exception e) {
+                    mEpcData = null;
+                }
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mEpcData = null;
+        if (mRFIDTask != null) {
+            mRFIDTask.cancel(false);
+            mRFIDTask = null;
+        }
         mRFIDFragment = null;
         mRfidEnsureFragment = null;
         mWeixinFragment = null;
         mWeixinEnsureFragment = null;
         mPhoneFragment = null;
         mPhoneEnsureFragment = null;
-        closeSerialPort1();
     }
 
     @Override
@@ -280,13 +263,16 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
     public void showFragment(int index) {
         LogUtils.d(TAG, "showFragment pos = " + index);
         switch (index) {
-            case FRAGMENT_LOGIN_RFID_3 + 1:
+            case FRAGMENT_LOGIN_RFID_2 + 1:
             case FRAGMENT_LOGIN_WEIXIN_2 + 1:
             case FRAGMENT_LOGIN_PHONE_2 + 1:
+                ((AhsApplication) getApplication()).setWeight(mBaseWeight);
                 Intent intent = new Intent(LoginMainActivity.this,
                         WorkMainActivity.class);
                 intent.putExtra("owner_info", mInfo);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+                finish();
                 return;
 
             default:
@@ -305,13 +291,11 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
             }
             break;
         case FRAGMENT_LOGIN_RFID_2:
-            // TODO
-            break;
-        case FRAGMENT_LOGIN_RFID_3:
             if (mRfidEnsureFragment == null) {
-                mRfidEnsureFragment = new RFIDEnsureFragment(this, index);
+                mRfidEnsureFragment = new RFIDEnsureFragment(this, mInfo, index);
                 mTransaction.add(R.id.content, mRfidEnsureFragment);
             } else {
+                mRfidEnsureFragment.setInfo(mInfo);
                 mTransaction.show(mRfidEnsureFragment);
             }
             break;
@@ -378,20 +362,52 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
         }
     }
 
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(android.os.Message msg) {
-            String[] data = (String[]) msg.obj;
-            switch (msg.what) {
-                case MSG_UPDATE_DEBUG:
-                    Utils.showMsg(LoginMainActivity.this, "login :" +
-                            data[0] + data[1]);
-                    break;
+    private void initSerialPort() {
+        new AsyncTask<Void, Void, Void>() {
 
-                default:
-                    break;
+            @Override
+            protected Void doInBackground(Void... params) {
+                initSerialPort1();
+                initSerialPort2();
+                LogUtils.d(TAG, "initSerialPort");
+                return null;
             }
+
+            protected void onPostExecute(Void result) {
+                mReaderHelper1.setListener(LoginMainActivity.this);
+                mReaderHelper2.setListener(LoginMainActivity.this);
+            }
+        }.execute();
+    }
+
+    private void requestLogin(final String json) {
+        String url = HttpRequest.URL_HEAD + HttpRequest.MACHINE_LOGIN;
+        if (mRFIDTask != null) {
+            mRFIDTask.cancel(true);
         }
-    };
+        mRFIDTask = new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                byte[] data = HttpRequest.sendPost(params[0], json);
+                if (data == null) {
+                    return null;
+                }
+                String result = new String(data);
+                LogUtils.d(TAG, "requestLogin:" + result);
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                if (result != null) {
+                    mInfo = Utils.parseLoginCode(result);
+                    if (mInfo != null && mPosition == FRAGMENT_LOGIN_RFID_1) {
+                        showFragment(FRAGMENT_LOGIN_RFID_2);
+                    }
+                }
+                mEpcData = null;
+            }
+        }.execute(url);
+    }
 
 }

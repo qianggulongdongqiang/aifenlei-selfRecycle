@@ -36,6 +36,28 @@
             android:typeface="sans" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/join_exception"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/home_btn_height"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:weightSum="2" >
+
+        <Button
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@anim/button_right_selector"
+            android:text="@string/machine_exception"
+            android:textColor="@color/login_button_enable"
+            android:textSize="@dimen/home_btn_size"
+            android:typeface="sans" />
+
+    </LinearLayout>
+
     <android.support.v4.view.ViewPager
         android:id="@+id/banners"
         android:layout_width="match_parent"

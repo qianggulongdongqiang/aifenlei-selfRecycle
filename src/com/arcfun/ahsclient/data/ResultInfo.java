@@ -45,4 +45,9 @@ public class ResultInfo {
     public void setData(String data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "[code=" + code + ", msg=" + msg + ", data=" + data + "]";
+    }
 }

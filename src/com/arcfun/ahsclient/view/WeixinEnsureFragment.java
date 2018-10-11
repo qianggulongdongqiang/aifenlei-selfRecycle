@@ -55,7 +55,7 @@ public class WeixinEnsureFragment extends BaseLoginFragment implements
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mAccount.setText(getActivity().getResources().getString(
-                R.string.login_qr_title3));
+                R.string.login_qr_title2));
         if (mInfo != null) {
             mName.setText(mInfo.getNickName());
             mNumber.setText("(" + Utils.formatPhoneNumber(mInfo.getMobile())

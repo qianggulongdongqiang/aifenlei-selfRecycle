@@ -11,6 +11,15 @@ import com.reader.helper.ReaderHelper;
 
 public class AhsApplication extends Application {
     private List<Activity> activities = new ArrayList<Activity>();
+    private float weight = 0f;
+
+    public float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(float weight) {
+        this.weight = weight;
+    }
 
     @Override
     public void onCreate() {

@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="left"
-                android:text="@string/type_package1"
+                android:text="@string/type_package2"
                 android:textColor="@color/login_title"
                 android:textSize="@dimen/phone_number_size" />
 

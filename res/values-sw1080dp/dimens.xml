@@ -4,8 +4,8 @@
     <dimen name="actionbar_height">240dp</dimen>
     <dimen name="login_barcode_size">160dp</dimen>
     <dimen name="login_barcode_margin">40dp</dimen>
-    <dimen name="login_title_width">335dp</dimen>
-    <dimen name="login_title_height">45dp</dimen>
+    <dimen name="login_title_width">232dp</dimen>
+    <dimen name="login_title_height">90dp</dimen>
     <dimen name="top_v_margin">10dp</dimen>
     <dimen name="login_title_margin">0dp</dimen>
     <dimen name="login_back_width">240dp</dimen>
@@ -40,8 +40,8 @@
     <dimen name="button_h_margin">70dp</dimen>
     <dimen name="home_btn_height">150dp</dimen>
     <dimen name="enter_btn_size">70dp</dimen>
-    <dimen name="open_top_s_margin">170dp</dimen>
-    <dimen name="open_top_e_margin">180dp</dimen>
+    <dimen name="open_top_s_margin">160dp</dimen>
+    <dimen name="open_top_e_margin">160dp</dimen>
     <dimen name="listview_divider">2dp</dimen>
     <dimen name="listview_h_margin">100dp</dimen>
     <dimen name="fragment_title_h_margin">100dp</dimen>
@@ -97,7 +97,9 @@
     <dimen name="exchange_title_wh_height">30dp</dimen>
 
     <!--     dialog -->
-    <dimen name="dialog_layout_width">320dp</dimen>
+    <dimen name="dialog_layout_width">950dp</dimen>
+    <dimen name="dialog_layout_height">1100dp</dimen>
+    <dimen name="list_spinner_padding">1dp</dimen>
     <dimen name="dialog_close_width">48dp</dimen>
     <dimen name="dialog_close_half">24dp</dimen>
     <dimen name="info_margin">30dp</dimen>
@@ -129,6 +131,7 @@
     <dimen name="home_btn_size">46sp</dimen>
     <dimen name="finish_left_size">42sp</dimen>
     <dimen name="finish_right_size">48sp</dimen>
+    <dimen name="guest_text_size">45sp</dimen>
     <dimen name="info_left_title_size">18sp</dimen>
     <dimen name="info_right_title_size">22sp</dimen>
     <dimen name="weight_title_size">25sp</dimen>

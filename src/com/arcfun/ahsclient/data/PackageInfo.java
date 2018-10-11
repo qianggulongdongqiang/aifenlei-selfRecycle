@@ -18,7 +18,8 @@ public class PackageInfo implements Parcelable {
     private String uName;
     private int total;
 
-    public PackageInfo(int _id, String _name, String _uname, float _unit, float _weight) {
+    public PackageInfo(int _id, String _name, String _uname, float _unit,
+            float _weight) {
         this.id = _id;
         this.name = _name;
         this.uName = _uname;
@@ -93,6 +94,7 @@ public class PackageInfo implements Parcelable {
         name = source.readString();
         unit = source.readFloat();
         weight = source.readFloat();
+        uName = source.readString();
         total = source.readInt();
     }
 
@@ -107,12 +109,13 @@ public class PackageInfo implements Parcelable {
         dest.writeString(name);
         dest.writeFloat(unit);
         dest.writeFloat(weight);
+        dest.writeString(uName);
         dest.writeInt(total);
     }
 
     @Override
     public String toString() {
-        return "[name=" + name + ", unit=" + unit + ", weight=" + weight
-                + ",  total=" + total + "]";
+        return "[id=" + id + ", name=" + name + ", unit=" + unit + ", weight="
+                + weight + ",  uName=" + uName + ",  total=" + total + "]";
     }
 }

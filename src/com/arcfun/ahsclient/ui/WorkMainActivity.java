@@ -1,8 +1,11 @@
 package com.arcfun.ahsclient.ui;
 
-import java.util.Arrays;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,17 +22,21 @@ import com.arcfun.ahsclient.R;
 import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.data.PackageInfo;
 import com.arcfun.ahsclient.data.ProductAndOwnerInfo;
+import com.arcfun.ahsclient.net.HttpRequest;
+import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper.OnFinishListener;
 import com.arcfun.ahsclient.utils.LogUtils;
 import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
 import com.arcfun.ahsclient.view.BaseLoginFragment.OnActionCallBack;
+import com.arcfun.ahsclient.view.GuestFinshFragment;
 import com.arcfun.ahsclient.view.OpenBottleFragment;
 import com.arcfun.ahsclient.view.OpenPackageFragment;
 import com.arcfun.ahsclient.view.ResultBottleFragment;
 import com.arcfun.ahsclient.view.ResultFinshFragment;
 import com.arcfun.ahsclient.view.ResultPackageFragment;
+import com.reader.base.CMD;
 import com.reader.base.StringTool;
 import com.reader.helper.ReaderHelper.Listener;
 
@@ -37,7 +44,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         OnFinishListener, OnActionCallBack {
     private static final String TAG = "Work|Main";
     private ImageView mStep2, mStep2End, mStep3;
-    private ImageView mBar, mBack;
+    private ImageView mBack;
     private TextView mType, mLable;
     /** bottle */
     private OpenBottleFragment mBottleOpenFragment;
@@ -49,6 +56,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
 
     /** finish */
     private ResultFinshFragment mResultFinishFragment;
+    private GuestFinshFragment mGuestFinishFragment;
     private FragmentManager mManager;
     private FragmentTransaction mTransaction;
     private Button mCountDown;
@@ -63,15 +71,19 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
 
     public static final int FRAGMENT_OPEN_DEFAULT = FRAGMENT_PACKAGE_IN;
     public static final int FRAGMENT_FINISH = 70;
-    public static final int FRAGMENT_EXIT = 80;
+    public static final int FRAGMENT_GUEST_FINISH = 80;
+    public static final int FRAGMENT_EXIT = 100;
 
     private int mPosition = FRAGMENT_OPEN_DEFAULT;
     public static final int PERIOD = 200 * 1000;
     public static final int INTERVAL = 1 * 1000;
+    private String mToken;
     private OwnerInfo mOwnerInfo;
     private PackageInfo mPackageInfo;
     private int mMachineType = 0;// package
     protected boolean isGuest;
+    private boolean isFull = false;
+    private float mBase = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,22 +93,24 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         mManager = getSupportFragmentManager();
         initData();
         initView();
-        initSerialPort1();
-        openOrClosesHouse(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                initSerialPort1();
+                openOrClosesHouse(true);
+            }
+        }).start();
     }
 
     private void openOrClosesHouse(boolean isOpen) {
         try {
-            mReaderHelper1.getReader().sendOpenHouse(true);
+            mReaderHelper1.getReader().sendOpenHouse(isOpen);
         } catch (Exception e) {
-            Utils.showMsg(this,
-                    isOpen ? "Open" : "Close" + " House :" + e.toString());
         }
     }
 
     private void initView() {
         mBack = (ImageView) findViewById(R.id.open_back);
-        mBar = (ImageView) findViewById(R.id.title_barcode);
         mType = (TextView) findViewById(R.id.work_type);
         mLable = (TextView) findViewById(R.id.barcode_text);
         mStep2 = (ImageView) findViewById(R.id.open_step2);
@@ -107,9 +121,6 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         mHelper = new CountDownTimerHelper(mCountDown, PERIOD, INTERVAL);
         mHelper.setOnFinishListener(this);
         mBack.setOnClickListener(this);
-        if (Utils.DEBUG) {
-            mBar.setOnClickListener(this);
-        }
         setMachineType(mMachineType);
         showFragment(FRAGMENT_OPEN_DEFAULT);
     }
@@ -119,6 +130,9 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         if (intent != null) {
             isGuest = intent.getBooleanExtra("isGuest", false);
             mOwnerInfo = intent.getParcelableExtra("owner_info");
+            if (mOwnerInfo == null) {
+                mOwnerInfo = new OwnerInfo(0, "Guest", 0, "");
+            }
         }
         mMachineType = SharedPreferencesUtils.getMachineType(this);
         mPackageInfo = SharedPreferencesUtils.getMachineInfo(this);
@@ -127,11 +141,14 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     @Override
     protected void onResume() {
         super.onResume();
+        mToken = SharedPreferencesUtils.getToken(this);
         String lable = SharedPreferencesUtils
                 .getSignature(getApplicationContext());
         mLable.setText(getString(R.string.title_des4, lable));
         mHelper.start();
         mReaderHelper1.setListener(this);
+        mBase = ((AhsApplication) getApplication()).getWeight();;
+        LogUtils.d(TAG, "onResume base= " + mBase);
     }
 
     @Override
@@ -149,16 +166,34 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             break;
         case R.id.open_back:
             if (mPosition == FRAGMENT_OPEN_DEFAULT) {
-                onBackPressed();
+                if (mOwnerInfo != null && mOwnerInfo.getVendor() > 0) {
+                    return;
+                }
                 try {
                     mReaderHelper1.getReader().sendOpenHouse(false);
                 } catch (Exception e) {
                     Utils.showMsg(this, "Close House :" + e.toString());
                 }
+                if (isGuest) {
+                    onBackPressed();
+                    return;
+                }
+                Intent intent = new Intent(WorkMainActivity.this,
+                        LoginMainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
                 return;
-            } else if (mPosition == FRAGMENT_FINISH) {
+            } else if (mPosition == FRAGMENT_FINISH ||
+                    mPosition == FRAGMENT_GUEST_FINISH) {
+                try {
+                    mReaderHelper1.getReader().sendOpenHouse(false);
+                } catch (Exception e) {
+                    Utils.showMsg(this, "Close House :" + e.toString());
+                }
                 Intent intent = new Intent(WorkMainActivity.this,
                         HomeMainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
                 return;
@@ -173,7 +208,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     }
 
     /**
-     * 0 - package; 1- bottle
+     * 0 - package -weight; 1 - package - piece; 2 - bottle
      */
     private void setMachineType(int type) {
         switch (type) {
@@ -181,8 +216,10 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             mType.setText(getString(R.string.status_bar_work2));
             break;
         case 1:
-            mType.setText(getString(R.string.status_bar_work1));
+            mType.setText(getString(R.string.status_bar_work3));
             break;
+        case 2:
+            mType.setText(getString(R.string.status_bar_work1));
 
         default:
             mType.setText(getString(R.string.status_bar_work2));
@@ -229,7 +266,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             case 0:
                 return FRAGMENT_PACKAGE_ENSURE;
             case 1:
-                return FRAGMENT_BOTTLE_ENSURE;
+                return FRAGMENT_PACKAGE_ENSURE;
             case 2:
                 return FRAGMENT_BOTTLE_ENSURE;
 
@@ -256,10 +293,9 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     @Override
     public void onRawInfo(int type, byte[] receiveData) {
         String data = StringTool.encodeHex(receiveData);
-        long time = System.currentTimeMillis();
         String[] raw = new String[2];
         Message msg = mHandler.obtainMessage(MSG_UPDATE_DEBUG);
-        raw[0] = "time: " + time;
+        raw[0] = "time: " + Utils.getTime();
         raw[1] = "\n" + receiveData.length + ", [0]" + type + "\n" + data;
         msg.obj = raw;
         msg.sendToTarget();
@@ -272,36 +308,40 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     @Override
     public void onDEVInfo(int type, byte[] devData) {
         String[] data = StringTool.encodeHexToArrays(devData);
+        handleDevInfo(data);
         if (mPackageOpenFragment != null) {
-            mPackageOpenFragment.handleDevInfo(data);
+            mPackageOpenFragment.handleDevInfo(data, mBase);
         }
-        long time = System.currentTimeMillis();
-        Message msg = mHandler.obtainMessage(MSG_UPDATE_DEBUG);
-        String[] raw = new String[2];
-        raw[0] = "Dev time: " + time;
-        if (data[0].equals("58") && data[1].equals("03")) {
-            raw[1] = "\nlength=" + data.length + ", top=" + type + "\n" + Arrays.toString(data)
-                    + "\n" + Utils.getIndex(data) + ", " + Utils.getWeight(data);
-        } else {
-            raw[1] = "\nlength=" + data.length + ", top=" + type + "\n" + Arrays.toString(data)
-                    + "\n" + Arrays.toString(devData);
-        }
-        msg.obj = raw;
-        msg.sendToTarget();
     }
 
     @Override
     public void onQRCInfo(int type, byte[] btData) {
     }
 
+    private void handleDevInfo(String[] data) {
+        if (data == null || data.length < Constancts.LENGTH_DEV) {
+            return;
+        }
+        if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1])) {
+            if (isFull != data[2].equals("01")) {
+                isFull = data[2].equals("01");
+                SharedPreferencesUtils.setState(this, 40);
+                String token = SharedPreferencesUtils.getToken(this);
+                requestSyncState(Utils.buildStateCode(token, 40));
+            }
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        LogUtils.d(TAG, "onDestroy");
         mPackageOpenFragment = null;
         mPackageResultFragment = null;
         mBottleOpenFragment = null;
         mBottleResultFragment = null;
         mResultFinishFragment = null;
+        mGuestFinishFragment = null;
         openOrClosesHouse(false);
 
     }
@@ -317,6 +357,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             mOwnerInfo = null;
             Intent intent = new Intent(WorkMainActivity.this,
                     HomeMainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
             finish();
         }
@@ -325,6 +366,13 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
 
     @Override
     public void onFinish() {
+        if (mPosition == FRAGMENT_BOTTLE_IN ||
+                mPosition == FRAGMENT_PACKAGE_IN) {
+            if (mOwnerInfo != null && mOwnerInfo.getVendor() > 0) {
+                addOrder(buildProductJson());
+                return;
+            }
+        }
         onBackPressed();
         try {
             mReaderHelper1.getReader().sendOpenHouse(false);
@@ -349,9 +397,17 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         // update action bar
         if (index == FRAGMENT_PACKAGE_ENSURE || index == FRAGMENT_BOTTLE_ENSURE) {
             updateProgress(1);
+            try {
+                mReaderHelper1.getReader().sendOpenHouse(false);
+            } catch (Exception e) {
+            }
         } else if (index == FRAGMENT_PACKAGE_IN || index == FRAGMENT_BOTTLE_IN) {
             updateProgress(0);
-        } else if (index == FRAGMENT_FINISH) {
+            try {
+                mReaderHelper1.getReader().sendOpenHouse(true);
+            } catch (Exception e) {
+            }
+        } else if (index == FRAGMENT_FINISH || index == FRAGMENT_GUEST_FINISH) {
             updateProgress(2);
         }
 
@@ -362,7 +418,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         case FRAGMENT_PACKAGE_IN:
             if (mPackageOpenFragment == null) {
                 mPackageOpenFragment = new OpenPackageFragment(this,
-                        mOwnerInfo, index);
+                        mPackageInfo, mOwnerInfo, index);
                 mTransaction.add(R.id.content, mPackageOpenFragment);
             } else {
                 mPackageOpenFragment.setOwnerInfo(mOwnerInfo);
@@ -371,7 +427,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             break;
         case FRAGMENT_PACKAGE_ENSURE:
             if (mOwnerInfo != null) {
-                mPackageInfo.setWeight(mOwnerInfo.getVendor());// TODO
+                mPackageInfo.setWeight(mOwnerInfo.getVendor());
             }
             if (mPackageResultFragment == null) {
                 mPackageResultFragment = new ResultPackageFragment(this,
@@ -410,6 +466,14 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
                 mTransaction.show(mResultFinishFragment);
             }
             break;
+        case FRAGMENT_GUEST_FINISH:
+            if (mGuestFinishFragment == null) {
+                mGuestFinishFragment = new GuestFinshFragment(this, index);
+                mTransaction.add(R.id.content, mGuestFinishFragment);
+            } else {
+                mTransaction.show(mGuestFinishFragment);
+            }
+            break;
         }
 
         mTransaction.commit();
@@ -432,6 +496,61 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         if (mResultFinishFragment != null) {
             mTransaction.hide(mResultFinishFragment);
         }
+        if (mGuestFinishFragment != null) {
+            mTransaction.hide(mGuestFinishFragment);
+        }
+    }
+
+    private String buildProductJson() {
+        JSONObject object = new JSONObject();
+        try {
+            JSONObject good = new JSONObject();
+            good.put("id", String.valueOf(mPackageInfo.getId()));
+            good.put("num", Utils.formatDouble(mPackageInfo.getWeight()));
+            good.put("name", mPackageInfo.getName());
+            JSONArray array = new JSONArray();
+            array.put(good);
+
+            object.put("token", mToken);
+            if (mOwnerInfo != null && mOwnerInfo.getId() > 0) {
+                object.put("user_id", mOwnerInfo.getId());
+            }
+            object.put("goods", array);
+            object.put("type", "4");
+        } catch (JSONException e) {
+            LogUtils.e(TAG, "buildProductJson:" + e.toString());
+        }
+        LogUtils.d(TAG, "buildProductJson:" + object.toString());
+        return object.toString();
+    }
+
+    private void addOrder(final String json) {
+        String url = HttpRequest.URL_HEAD + HttpRequest.ADD_ORDER;
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                byte[] data = HttpRequest.sendPost(params[0], json);
+                LogUtils.d(TAG, "addOrder data =" + data);
+                if (data == null) {
+                    return null;
+                }
+                String result = new String(data);
+                LogUtils.d(TAG, "addOrder:" + result);
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                if (result != null) {
+                    if (mOwnerInfo.getId() > 0) {
+                        onUpdate(FRAGMENT_FINISH, null);
+                        mHelper.start();
+                    } else {
+                        onUpdate(FRAGMENT_GUEST_FINISH, null);
+                    }
+                }
+            }
+        }.execute(url);
     }
 
     private Handler mHandler = new Handler() {
@@ -439,13 +558,13 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         public void handleMessage(android.os.Message msg) {
             String[] data = (String[]) msg.obj;
             switch (msg.what) {
-                case MSG_UPDATE_DEBUG:
-                    Utils.showMsg(WorkMainActivity.this, "work raw:" +
-                            data[0] + data[1]);
-                    break;
+            case MSG_UPDATE_DEBUG:
+                Utils.showMsg(WorkMainActivity.this, "work raw:" + data[0]
+                        + data[1]);
+                break;
 
-                default:
-                    break;
+            default:
+                break;
             }
         }
     };

@@ -8,7 +8,6 @@ import android.content.Context;
 import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.Utils;
 import com.reader.base.CMD;
-import com.reader.base.MessageTran;
 import com.reader.base.ReaderBase;
 
 public class ReaderHelper {
@@ -96,7 +95,7 @@ public class ReaderHelper {
                         if (mType == Constancts.TYPE_DEV) {
                             //mListener.onDEVInfo(11, btAryReceiveData);
                         } else if (mType == Constancts.TYPE_EPC) {
-                            mListener.onEPCInfo(12, btAryReceiveData);
+                            //mListener.onEPCInfo(12, btAryReceiveData);
                         } else if (mType == Constancts.TYPE_QRC) {
                             mListener.onQRCInfo(13, btAryReceiveData);
                         }
@@ -117,13 +116,6 @@ public class ReaderHelper {
             throw new NullPointerException("mReader is Null!");
         }
         return mReader;
-    }
-
-    public void analyData(MessageTran msgTran) {
-        if (msgTran.getPacketType() != CMD.HEAD) {
-            return;
-        }
-
     }
 
 }

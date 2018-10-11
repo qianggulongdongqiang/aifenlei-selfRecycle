@@ -37,6 +37,7 @@ public class HttpRequest {
     public static final String DEVICE_LOGIN = "api/machine/login.html";
     public static final String GET_QR_CODE = "api/machine/getQRcode.html";
     public static final String MACHINE_LOGIN = "api/machine/userLogin.html";
+    public static final String MACHINE_SET_STATE = "api/machine/setState.html";
 
     /**
      * 向指定 URL 发送POST方法的请求

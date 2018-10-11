@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.arcfun.ahsclient.R;
+import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.utils.LogUtils;
 import com.arcfun.ahsclient.utils.Utils;
 
@@ -19,12 +20,19 @@ public class RFIDEnsureFragment extends BaseLoginFragment implements
     private int mIndex;
     private TextView mAccount, mName, mNumber, mMsg;
     private Button mOk, mBack;
+    private OwnerInfo mInfo;
 
     public RFIDEnsureFragment() {
     }
 
-    public RFIDEnsureFragment(OnActionCallBack listener, int index) {
+    public void setInfo(OwnerInfo info) {
+        this.mInfo = info;
+    }
+
+    public RFIDEnsureFragment(OnActionCallBack listener, OwnerInfo info,
+            int index) {
         this.mListener = listener;
+        this.mInfo = info;
         this.mIndex = index;
     }
 
@@ -51,14 +59,22 @@ public class RFIDEnsureFragment extends BaseLoginFragment implements
                 R.string.login_rfid_title2));
         mBack.setText(getString(R.string.login_resume));
         mMsg.setText(getString(R.string.login_rfid_title3_msg));
-        mName.setText("Android");
-        mNumber.setText(Utils.formatPhoneNumber("18521365719"));
+        if (mInfo != null) {
+            mName.setText(mInfo.getNickName());
+            mNumber.setText("(" + Utils.formatPhoneNumber(mInfo.getMobile())
+                    + ")");
+        }
     }
 
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         LogUtils.d(TAG, "onHiddenChanged mIndex = " + mIndex);
+        if (mInfo != null && !hidden) {
+            mName.setText(mInfo.getNickName());
+            mNumber.setText("(" + Utils.formatPhoneNumber(mInfo.getMobile())
+                    + ")");
+        }
     }
 
     @Override
@@ -66,12 +82,13 @@ public class RFIDEnsureFragment extends BaseLoginFragment implements
         switch (v.getId()) {
         case R.id.account_login:
             if (mListener != null) {
-                mListener.onUpdate(mIndex + 1, null);
+                mListener.onUpdate(mIndex + 1, mInfo);
             }
             break;
         case R.id.account_switch:
             if (mListener != null) {
-                // mListener.onUpdate(FRAGMENT_LOGIN_PHONE_1);
+                mInfo = null;
+                mListener.onUpdate(FRAGMENT_LOGIN_RFID_1, null);
             }
             break;
 

@@ -3,7 +3,7 @@
 
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/login_button_click" />
+            <solid android:color="@color/dialog_default" />
         </shape>
     </item>
     <item android:state_pressed="false">

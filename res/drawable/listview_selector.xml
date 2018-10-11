@@ -3,7 +3,7 @@
 
     <item android:state_enabled="true"
         android:state_pressed="false"
-        android:drawable="@color/white" />
+        android:drawable="@color/fragment_backgroud_color" />
 
     <item android:state_enabled="true"
         android:state_pressed="true"

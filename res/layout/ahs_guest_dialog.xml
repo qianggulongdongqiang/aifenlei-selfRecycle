@@ -1,0 +1,77 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/dialog_layout_width"
+    android:layout_height="@dimen/dialog_layout_height"
+    android:background="@drawable/ahs_fragment_bg"
+    android:orientation="vertical"
+    android:weightSum="17" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alert_diag_title"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/fragment_title_size"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/guest_tips"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/alert_diag_title"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/phone_number_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:background="@drawable/bg_miniwhit1"
+        android:padding="@dimen/fragement_margin_horizon"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/guest_tip"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/guest_text_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="7"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/guest_login"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="@dimen/button_height"
+            android:background="@anim/button_dark_selector"
+            android:text="@string/login_ok"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/fragment_account_size"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/guest_switch"
+            android:layout_width="@dimen/button_width"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/button_h_margin"
+            android:background="@anim/button_light_selector"
+            android:text="@string/login_back"
+            android:textColor="@color/action_bar_bg_color"
+            android:textSize="@dimen/fragment_account_size" />
+    </LinearLayout>
+
+</LinearLayout>

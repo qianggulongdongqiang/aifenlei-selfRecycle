@@ -28,11 +28,10 @@ public class BaseLoginFragment extends Fragment {
     public static final int FRAGMENT_BOTTLE_IN = 60;
     public static final int FRAGMENT_BOTTLE_ENSURE = FRAGMENT_BOTTLE_IN + 1;
     public static final int FRAGMENT_FINISH = 70;
-    public static final int FRAGMENT_EXIT = 80;
-    protected String mToken;
+    public static final int FRAGMENT_GUEST_FINISH = 80;
+    public static final int FRAGMENT_EXIT = 100;
 
     public BaseLoginFragment() {
-        mToken = SharedPreferencesUtils.getToken(getActivity());
     }
 
     public interface OnActionCallBack {
@@ -43,7 +42,8 @@ public class BaseLoginFragment extends Fragment {
     protected void initSerialPort1() {
         LogUtils.d(TAG, "initSerialPort1");
         try {
-            mSerialPort1 = new SerialPort(new File(Utils.SERIAL_PROT_1),
+            mSerialPort1 = new SerialPort(new File(
+                    SharedPreferencesUtils.getPort(getActivity(), 1)),
                     Utils.BAUD_RATE_DEF, 0);
             mReaderHelper1.setReader(mSerialPort1.getInputStream(),
                     mSerialPort1.getOutputStream(), Constancts.TYPE_DEV);
@@ -58,7 +58,8 @@ public class BaseLoginFragment extends Fragment {
     protected void initSerialPort2() {
         LogUtils.d(TAG, "initSerialPort2");
         try {
-            mSerialPort2 = new SerialPort(new File(Utils.SERIAL_PROT_2),
+            mSerialPort2 = new SerialPort(new File(
+                    SharedPreferencesUtils.getPort(getActivity(), 2)),
                     Utils.BAUD_RATE_UHF, 0);
             mReaderHelper2.setReader(mSerialPort2.getInputStream(),
                     mSerialPort2.getOutputStream(), Constancts.TYPE_EPC);

@@ -19,6 +19,7 @@ import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.data.PackageInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
 import com.arcfun.ahsclient.utils.LogUtils;
+import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
 
 public class ResultPackageFragment extends BaseLoginFragment implements
@@ -26,10 +27,12 @@ public class ResultPackageFragment extends BaseLoginFragment implements
     private static final String TAG = "Result|Package";
     private OnActionCallBack mListener;
     private int mIndex;
-    private TextView mResultTips, mResultWeight, mResultSum, mResultTotal;
+    private TextView mResultTips, mResultType, mResultWeight, mResultSum,
+            mResultTotal;
     private Button mFinishBtn;
     private PackageInfo mInfo;
     private OwnerInfo mOwnerInfo;
+    private String mToken = "";
 
     public ResultPackageFragment() {
     }
@@ -51,8 +54,15 @@ public class ResultPackageFragment extends BaseLoginFragment implements
         this.mOwnerInfo = owner;
         if (packge != null) {
             LogUtils.d(TAG, "setPackageInfo " + mInfo.toString());
-            mResultTips.setText(getString(R.string.history_unit,
-                    mInfo.getUnit()));
+            if (mInfo.getId() == 30 || mInfo.getId() == 33
+                    || mInfo.getId() == 36) {
+                mResultTips.setText(getString(R.string.history_unit,
+                        mInfo.getUnit()));
+            } else {
+                mResultTips.setText(getString(R.string.history_unit2,
+                        mInfo.getUnit()));
+            }
+            mResultType.setText(mInfo.getName());
             mResultWeight.setText(getString(R.string.history_weight,
                     mInfo.getWeight()));
             mResultSum.setText(getString(R.string.history_credit,
@@ -72,15 +82,24 @@ public class ResultPackageFragment extends BaseLoginFragment implements
         View view = inflater.inflate(R.layout.ahs_open_result1_fragment,
                 container, false);
         mResultTips = (TextView) view.findViewById(R.id.result_unit);
+        mResultType = (TextView) view.findViewById(R.id.result_type);
         mResultWeight = (TextView) view.findViewById(R.id.result_weight);
         mResultSum = (TextView) view.findViewById(R.id.result_sum);
         mResultTotal = (TextView) view.findViewById(R.id.total_credit);
         mFinishBtn = (Button) view.findViewById(R.id.open_finish);
         mFinishBtn.setOnClickListener(this);
+        mToken = SharedPreferencesUtils.getToken(getActivity());
         if (mInfo != null) {
             LogUtils.d(TAG, "result " + mInfo.toString());
-            mResultTips.setText(getString(R.string.history_unit,
-                    mInfo.getUnit()));
+            if (mInfo.getId() == 30 || mInfo.getId() == 33
+                    || mInfo.getId() == 36) {
+                mResultTips.setText(getString(R.string.history_unit,
+                        mInfo.getUnit()));
+            } else {
+                mResultTips.setText(getString(R.string.history_unit2,
+                        mInfo.getUnit()));
+            }
+            mResultType.setText(mInfo.getName());
             mResultWeight.setText(getString(R.string.history_weight,
                     mInfo.getWeight()));
             mResultSum.setText(getString(R.string.history_credit,
@@ -110,10 +129,6 @@ public class ResultPackageFragment extends BaseLoginFragment implements
     public void onClick(View v) {
         switch (v.getId()) {
         case R.id.open_finish:
-            if (mOwnerInfo == null) {//TODO
-                Utils.showMsg(getActivity(), getString(R.string.feature_not_online));
-                return;
-            }
             addOrder(buildProductJson());
             break;
 
@@ -133,7 +148,7 @@ public class ResultPackageFragment extends BaseLoginFragment implements
             array.put(good);
 
             object.put("token", mToken);
-            if (mOwnerInfo != null) {
+            if (mOwnerInfo != null && mOwnerInfo.getId() > 0) {
                 object.put("user_id", mOwnerInfo.getId());
             }
             object.put("goods", array);
@@ -172,7 +187,9 @@ public class ResultPackageFragment extends BaseLoginFragment implements
                                 mInfo.getTotal(), "");
                     }
                     if (mListener != null) {
-                        mListener.onUpdate(FRAGMENT_FINISH, mOwnerInfo);
+                        if (mOwnerInfo.getId() > 0) {
+                            mListener.onUpdate(FRAGMENT_FINISH, mOwnerInfo);
+                        }
                     }
                 }
             }

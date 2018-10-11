@@ -28,7 +28,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:paddingTop="@dimen/login_title_margin"
-            android:text="@string/status_bar_work1"
+            android:text="@string/status_bar_work2"
             android:textColor="@color/login_title"
             android:textSize="@dimen/actionbar_count_down_size"
             android:typeface="sans" />

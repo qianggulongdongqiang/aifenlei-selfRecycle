@@ -13,9 +13,12 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import cn.jpush.android.api.JPushInterface;
 
+import com.arcfun.ahsclient.data.MachineInfo;
+import com.arcfun.ahsclient.data.MachineType;
 import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.data.ResultInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
+import com.arcfun.ahsclient.ui.HomeMainActivity;
 import com.arcfun.ahsclient.ui.LoginMainActivity;
 import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.LogUtils;
@@ -39,7 +42,9 @@ public class JpushReceiver extends BroadcastReceiver {
                 LogUtils.d(TAG, "[MyReceiver] 接收Registration Id : " + regId);
                 // send the Registration Id to your server...
                 String token = SharedPreferencesUtils.getToken(context);
+                int state = SharedPreferencesUtils.getState(context);
                 requestSetPushCode(context, Utils.buildPushCode(token, regId));
+                requestSyncState(Utils.buildStateCode(token, state));
 
             } else if (JPushInterface.ACTION_MESSAGE_RECEIVED.equals(intent
                     .getAction())) {
@@ -60,19 +65,30 @@ public class JpushReceiver extends BroadcastReceiver {
                             Intent loginIntent = new Intent(context,
                                     LoginMainActivity.class);
                             loginIntent.putExtra("owner_info", info);
+                            loginIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             context.startActivity(loginIntent);
                         }
                         break;
                     case Constancts.TYPE_UPDATE_IMEI:
+                        MachineInfo machine = getNotificationUpdate(bundle);
+                        if (machine != null) {
+                            String token = SharedPreferencesUtils.getToken(context);
+                            int state = SharedPreferencesUtils.getState(context);
+                            requestSyncState(Utils.buildStateCode(token, state));
+                            SharedPreferencesUtils.setDeviceInfo(context,
+                                    machine);
+                            Intent home = new Intent(context,
+                                    HomeMainActivity.class);
+                            home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(home);
+                        }
                         break;
 
                     default:
                         break;
                     }
                     LogUtils.d(TAG, "getNotificationType= " + type);
-
                 }
-
             } else if (JPushInterface.ACTION_NOTIFICATION_OPENED.equals(intent
                     .getAction())) {
                 LogUtils.d(TAG, "[MyReceiver] 用户点击打开了通知");
@@ -200,6 +216,39 @@ public class JpushReceiver extends BroadcastReceiver {
         return null;
     }
 
+    private MachineInfo getNotificationUpdate(Bundle bundle) {
+        String extras = bundle.getString(JPushInterface.EXTRA_EXTRA);
+        if (!Utils.isEmpty(extras)) {
+            try {
+                JSONObject extraJson = new JSONObject(extras);
+                JSONObject dataObject = extraJson.optJSONObject("user");
+                if (extraJson.length() > 0) {
+                    JSONObject type1 = dataObject.getJSONObject("machine_type_1");
+                    JSONObject type2 = dataObject.getJSONObject("machine_type_2");
+                    return new MachineInfo(
+                            dataObject.getString("code"),
+                            dataObject.getString("signature"),
+                            dataObject.getInt("user_type"),
+                            new MachineType(type1.getInt("id"),
+                                    type1.getString("name"),
+                                    type1.getString("unit_name"),
+                                    type1.getString("unit"),
+                                    type1.getString("purchasing_point")),
+                            new MachineType(type2.getInt("id"),
+                                    type2.getString("name"),
+                                    type2.getString("unit_name"),
+                                    type2.getString("unit"),
+                                    type2.getString("purchasing_point"))
+                            );
+                }
+            } catch (JSONException e) {
+                LogUtils.e(TAG, "", e);
+            }
+
+        }
+        return null;
+    }
+
     private void requestSetPushCode(final Context c, final String json) {
         String url = HttpRequest.URL_HEAD + HttpRequest.SET_PUSH_CODE;
         new AsyncTask<String, Void, String>() {
@@ -225,6 +274,31 @@ public class JpushReceiver extends BroadcastReceiver {
                     SharedPreferencesUtils.setRegister(c,
                             resultInfo.getCode() == Utils.RESULT_OK);
                 }
+            }
+        }.execute(url);
+    }
+
+    protected void requestSyncState(final String json) {
+        String url = HttpRequest.URL_HEAD + HttpRequest.MACHINE_SET_STATE;
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                byte[] data = HttpRequest.sendPost(params[0], json);
+                if (data == null) {
+                    return null;
+                }
+                String result = new String(data);
+                LogUtils.d(TAG, "requestSyncState:" + result);
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                ResultInfo resultInfo = null;
+                if (result != null) {
+                    resultInfo = Utils.parsePushCode(result);
+                }
+                LogUtils.d(TAG, "requestSyncState:" + resultInfo.toString());
             }
         }.execute(url);
     }

@@ -61,7 +61,7 @@
     <ImageView
         android:layout_width="@dimen/login_title_width"
         android:layout_height="@dimen/login_title_height"
-        android:layout_alignParentBottom="true"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_margin="@dimen/login_barcode_margin"
         android:background="@drawable/icon_logo"

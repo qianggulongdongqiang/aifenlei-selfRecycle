@@ -14,6 +14,7 @@ public class Constancts {
     /** 修改配置后推送类型 */
     public static final int TYPE_UPDATE_IMEI = 20;
     public static final int LENGTH_DEV = 8;
+    public static final int LENGTH_EPC = 22;
     public static final int TYPE_DEV = 1;
     public static final int TYPE_EPC = 2;
     public static final int TYPE_QRC = 3;
@@ -21,6 +22,11 @@ public class Constancts {
     public static final int TYPE_MACHINE_BOTTLE = 25;
     public static final int TYPE_MACHINE_BOTTLE_BL = 26;
     public static final int TYPE_MACHINE_BOTTLE_SL = 27;
+    public static final int TYPE_MACHINE_PACKAGE = 29;
     public static final int TYPE_MACHINE_PACKAGE1 = 30;
     public static final int TYPE_MACHINE_PACKAGE2 = 31;
+    public static final int TYPE_MACHINE_PACKAGE3 = 36;
+    public static final int TYPE_MACHINE_BAG = 32;
+    public static final int TYPE_MACHINE_BAG1 = 33;
+    public static final String SECRET = "9646633";
 }

@@ -1,5 +1,10 @@
 package com.arcfun.ahsclient.view;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -12,23 +17,27 @@ import android.widget.TextView;
 
 import com.arcfun.ahsclient.R;
 import com.arcfun.ahsclient.data.OwnerInfo;
+import com.arcfun.ahsclient.data.PackageInfo;
+import com.arcfun.ahsclient.net.HttpRequest;
+import com.arcfun.ahsclient.ui.NoticeDialog;
 import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.LogUtils;
+import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
 import com.reader.base.CMD;
-import com.reader.base.StringTool;
-import com.reader.helper.ReaderHelper.Listener;
 
 public class OpenPackageFragment extends BaseLoginFragment implements
-        OnClickListener, OnLongClickListener, Listener {
+        OnClickListener, OnLongClickListener {
     private static final String TAG = "Open|Package";
     private OnActionCallBack mListener;
     private int mIndex;
     private TextView mOpenTips, mOpenMsg, mOpenStart, mOpenEnd;
     private Button mFinishBtn;
+    private PackageInfo mInfo;
     private OwnerInfo mOwnerInfo;
-    private float mWeight = 0;
+    private float mWeight = 0f;
     protected static final int MSG_UPDATE_WEIGHT = 0;
+    private String mToken = "";
 
     public OpenPackageFragment() {
     }
@@ -37,16 +46,18 @@ public class OpenPackageFragment extends BaseLoginFragment implements
         this.mOwnerInfo = info;
     }
 
-    public OpenPackageFragment(OnActionCallBack listener, OwnerInfo info,
-            int index) {
+    public OpenPackageFragment(OnActionCallBack listener, PackageInfo pInfo,
+            OwnerInfo oInfo, int index) {
         this.mListener = listener;
-        this.mOwnerInfo = info;
+        this.mInfo = pInfo;
+        this.mOwnerInfo = oInfo;
         this.mIndex = index;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        mToken = SharedPreferencesUtils.getToken(getActivity());
         View view = inflater.inflate(R.layout.ahs_open1_fragment, container,
                 false);
         mOpenTips = (TextView) view.findViewById(R.id.open_msg);
@@ -55,10 +66,14 @@ public class OpenPackageFragment extends BaseLoginFragment implements
         mOpenEnd = (TextView) view.findViewById(R.id.open_detail_e);
         mFinishBtn = (Button) view.findViewById(R.id.open_finish);
         mFinishBtn.setOnClickListener(this);
-        mFinishBtn.setOnLongClickListener(this);
-        mOpenTips.setText(getString(R.string.open_msg2));
-        mOpenStart.setText(getString(R.string.open_result_s2));
-        mOpenEnd.setText(getString(R.string.open_result_e2));
+        if (SharedPreferencesUtils.getDebug(getActivity())) {
+            mFinishBtn.setOnLongClickListener(this);
+        }
+        if (mInfo != null) {
+            mOpenTips.setText(getString(R.string.open_msg1, mInfo.getName()));
+            mOpenStart.setText(getString(R.string.open_result_s2, mInfo.getName()));
+            mOpenEnd.setText(mInfo.getuName());
+        }
         updateNum(0);
         LogUtils.d(TAG, "onCreateView " + mIndex);
         return view;
@@ -77,7 +92,9 @@ public class OpenPackageFragment extends BaseLoginFragment implements
     }
 
     private void updateNum(float num) {
-        mOpenMsg.setText(String.valueOf(num));
+        double pig = Utils.formatDouble(num < 0 ? 0 : num);
+        mOpenMsg.setText(String.valueOf(pig));
+        mInfo.setWeight(num);
     }
 
     @Override
@@ -85,13 +102,26 @@ public class OpenPackageFragment extends BaseLoginFragment implements
         switch (v.getId()) {
         case R.id.open_finish:
             if (mListener != null) {
-                mListener.onUpdate(FRAGMENT_PACKAGE_ENSURE, mOwnerInfo);
+                if (mInfo.getWeight() <= 0) {
+                    showDialog();
+                    return;
+                }
+                if (mOwnerInfo.getId() > 0) {
+                    mListener.onUpdate(FRAGMENT_PACKAGE_ENSURE, mOwnerInfo);
+                } else {
+                    addOrder(buildProductJson());
+                }
             }
             break;
 
         default:
             break;
         }
+    }
+
+    private void showDialog() {
+        NoticeDialog dialog = new NoticeDialog(getActivity());
+        dialog.show();
     }
 
     @Override
@@ -103,38 +133,71 @@ public class OpenPackageFragment extends BaseLoginFragment implements
         return true;
     }
 
-    @Override
-    public void onLostConnect(int type) {
-        Utils.showMsg(getActivity(), "onLostConnect");
-    }
-
-    @Override
-    public void onRawInfo(int type, byte[] btData) {
-        
-    }
-
-    @Override
-    public void onDEVInfo(int type, byte[] devData) {
-        String[] data = StringTool.encodeHexToArrays(devData);
-        handleDevInfo(data);
-    }
-
-    @Override
-    public void onEPCInfo(int type, byte[] btData) {}
-
-    @Override
-    public void onQRCInfo(int type, byte[] btData) {}
-
-    public void handleDevInfo(String[] data) {
+    public void handleDevInfo(String[] data, float base) {
         if (data != null && data.length == Constancts.LENGTH_DEV) {
-            if (CMD.NAME_UNSOLICETD_WEIGHT.equals(data[1])) {
-                mWeight = Utils.getWeight(data);
+            if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1]) ||
+                    CMD.NAME_UNSOLICETD_WEIGHT.equals(data[1])) {
+                mWeight = Utils.getWeight(data) - base;
+                if (mWeight < 0) {
+                    // exception here we just set 0;
+                    mWeight = 0f;
+                }
                 if (mOwnerInfo != null) {
                     mOwnerInfo.setVendor(mWeight);
                 }
                 mHandler.obtainMessage(MSG_UPDATE_WEIGHT).sendToTarget();
             }
         }
+    }
+
+    private String buildProductJson() {
+        JSONObject object = new JSONObject();
+        try {
+            JSONObject good = new JSONObject();
+            good.put("id", String.valueOf(mInfo.getId()));
+            good.put("num", Utils.formatDouble(mInfo.getWeight()));
+            good.put("name", mInfo.getName());
+            JSONArray array = new JSONArray();
+            array.put(good);
+
+            object.put("token", mToken);
+            if (mOwnerInfo != null && mOwnerInfo.getId() > 0) {
+                object.put("user_id", mOwnerInfo.getId());
+            }
+            object.put("goods", array);
+            object.put("type", "4");
+        } catch (JSONException e) {
+            LogUtils.e(TAG, "buildProductJson:" + e.toString());
+        }
+        LogUtils.d(TAG, "buildProductJson:" + object.toString());
+        return object.toString();
+    }
+
+    private void addOrder(final String json) {
+        String url = HttpRequest.URL_HEAD + HttpRequest.ADD_ORDER;
+        new AsyncTask<String, Void, String>() {
+            @Override
+            protected String doInBackground(String... params) {
+                byte[] data = HttpRequest.sendPost(params[0], json);
+                LogUtils.d(TAG, "addOrder data =" + data);
+                if (data == null) {
+                    return null;
+                }
+                String result = new String(data);
+                LogUtils.d(TAG, "addOrder:" + result);
+                return result;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                if (result != null) {
+                    if (mListener != null) {
+                        mListener.onUpdate(FRAGMENT_GUEST_FINISH,
+                                mOwnerInfo);
+                    }
+                }
+            }
+        }.execute(url);
     }
 
     private Handler mHandler = new Handler() {
