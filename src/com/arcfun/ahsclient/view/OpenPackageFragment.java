@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.arcfun.ahsclient.R;
+import com.arcfun.ahsclient.data.OrderResultInfo;
 import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.data.PackageInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
@@ -106,11 +107,7 @@ public class OpenPackageFragment extends BaseLoginFragment implements
                     showDialog();
                     return;
                 }
-                if (mOwnerInfo.getId() > 0) {
-                    mListener.onUpdate(FRAGMENT_PACKAGE_ENSURE, mOwnerInfo);
-                } else {
-                    addOrder(buildProductJson());
-                }
+                addOrder(buildProductJson());
             }
             break;
 
@@ -126,7 +123,7 @@ public class OpenPackageFragment extends BaseLoginFragment implements
 
     @Override
     public boolean onLongClick(View v) {
-        updateNum(mWeight += 60);
+        updateNum(mWeight += 1);
         if (mOwnerInfo != null) {
             mOwnerInfo.setVendor(mWeight);
         }
@@ -190,10 +187,23 @@ public class OpenPackageFragment extends BaseLoginFragment implements
 
             @Override
             protected void onPostExecute(String result) {
+                OrderResultInfo info = null;
                 if (result != null) {
+                    info = Utils.parseResultData(result);
+                    if (mOwnerInfo != null) {
+                        mOwnerInfo.setScore(info.getUserScore());
+                    } else {
+                        mOwnerInfo = new OwnerInfo(0, "Guest",
+                                mInfo.getTotal(), "");
+                    }
                     if (mListener != null) {
-                        mListener.onUpdate(FRAGMENT_GUEST_FINISH,
-                                mOwnerInfo);
+                        if (mOwnerInfo.getId() > 0) {
+                            mListener.onUpdate(FRAGMENT_PACKAGE_ENSURE,
+                                    mOwnerInfo);
+                        } else {
+                            mListener.onUpdate(FRAGMENT_GUEST_FINISH,
+                                    mOwnerInfo);
+                        }
                     }
                 }
             }

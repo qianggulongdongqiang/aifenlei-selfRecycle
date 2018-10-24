@@ -1,6 +1,7 @@
 package com.arcfun.ahsclient.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import android.content.Context;
@@ -35,7 +36,7 @@ import com.reader.helper.ReaderHelper.Listener;
 public class HomeMainActivity extends AhsBaseActivity implements
         OnClickListener, OnChooseListener, OnLongClickListener, Listener {
     private static final String TAG = "Home";
-    private Button mJoinFree, mJoinCredit;
+    private Button mJoinFree, mJoinCredit, mJoinException;
     private ViewPager mViewPager;
     private BannerPagerAdapter mAdapter;
     private LinearLayout mJoinLayout, mExceptionLayout;
@@ -46,18 +47,27 @@ public class HomeMainActivity extends AhsBaseActivity implements
     private String mToken;
     private int mPageCount = 0;
     private boolean isFull;
+    private boolean isException;
 
     private int mDiffDownTime = 5 * 1000;
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            String[] data = (String[]) msg.obj;
             switch (msg.what) {
             case MSG_SCROLL_MSG:
                 int next = mViewPager.getCurrentItem() + 1;
                 mViewPager.setCurrentItem(mPageCount == 0 ? 0 : next
                         % mPageCount);
                 startLoop(mDiffDownTime);
+                break;
+            case MSG_UPDATE_DEBUG:
+                Utils.showMsg(HomeMainActivity.this, "home :" +
+                        data[0] + data[1]);
+                break;
+            case MSG_DEV_SYNC:
+                updateState(msg.arg1 > 0);
                 break;
             }
         }
@@ -130,14 +140,17 @@ public class HomeMainActivity extends AhsBaseActivity implements
 
     private void initView() {
         mJoinLayout = (LinearLayout) findViewById(R.id.join_ll);
-        mExceptionLayout = (LinearLayout) findViewById(R.id.join_exception);
+        mExceptionLayout = (LinearLayout) findViewById(R.id.join_exception_ll);
         mJoinFree = (Button) findViewById(R.id.join_free);
         mJoinCredit = (Button) findViewById(R.id.join_credit);
+        mJoinException = (Button) findViewById(R.id.join_exception);
         mViewPager = (ViewPager) findViewById(R.id.banners);
         mAdapter = new BannerPagerAdapter(this, mBannerList);
         mViewPager.setAdapter(mAdapter);
         mJoinFree.setOnClickListener(this);
         mJoinCredit.setOnClickListener(this);
+        mJoinException.setOnClickListener(this);
+        mJoinFree.setOnLongClickListener(this);
     }
 
     @Override
@@ -145,7 +158,6 @@ public class HomeMainActivity extends AhsBaseActivity implements
         switch (v.getId()) {
         case R.id.join_free:
             if (mToken.isEmpty()) {
-                Utils.showMsg(this, getResources().getString(R.string.network_exception));
                 requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
                 if (!SharedPreferencesUtils.getDebug(this)) {
                     return;
@@ -156,7 +168,6 @@ public class HomeMainActivity extends AhsBaseActivity implements
             break;
         case R.id.join_credit:
             if (mToken.isEmpty()) {
-                Utils.showMsg(this, getResources().getString(R.string.network_exception));
                 requestLogin(Utils.buildLoginJson(Utils.getImei(this)));
                 if (!SharedPreferencesUtils.getDebug(this)) {
                     return;
@@ -166,6 +177,9 @@ public class HomeMainActivity extends AhsBaseActivity implements
             Intent intent = new Intent(this, LoginMainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            break;
+        case R.id.join_exception:
+            Utils.showMsg(HomeMainActivity.this, R.string.machine_exception);
             break;
 
         default:
@@ -361,9 +375,19 @@ public class HomeMainActivity extends AhsBaseActivity implements
             if (isFull != data[2].equals("01")) {
                 isFull = data[2].equals("01");
                 String token = SharedPreferencesUtils.getToken(this);
-                SharedPreferencesUtils.setState(this, 40);
-                requestSyncState(Utils.buildStateCode(token, 40));
-                updateState(isFull);
+                SharedPreferencesUtils.setState(this, isFull ? 40 : 10);
+                requestSyncState(Utils.buildStateCode(token, isFull ? 40 : 10));
+                Message msg = mHandler.obtainMessage(MSG_DEV_SYNC);
+                msg.arg1 = isFull ? 1 : 0;
+                msg.sendToTarget();
+            }
+            if (isException != (data[3].equals("02") || data[3].equals("03"))) {
+                isException = data[3].equals("02") || data[3].equals("03");
+                if (!isFull) {
+                    String token = SharedPreferencesUtils.getToken(this);
+                    requestSyncState(Utils.buildStateCode(token,
+                            isException ? 30 : 10));
+                }
             }
         }
         if (CMD.NAME_UNSOLICETD_SYNC.equals(data[1])
@@ -377,5 +401,4 @@ public class HomeMainActivity extends AhsBaseActivity implements
 
     @Override
     public void onQRCInfo(int type, byte[] btData) {}
-
 }

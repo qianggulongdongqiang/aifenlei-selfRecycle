@@ -11,7 +11,7 @@ public class PackageInfo implements Parcelable {
     /** name */
     private String name;
     /** unit */
-    private float unit;
+    private int unit;
     /** weight */
     private float weight;
     /** unit_name */
@@ -19,6 +19,16 @@ public class PackageInfo implements Parcelable {
     private int total;
 
     public PackageInfo(int _id, String _name, String _uname, float _unit,
+            float _weight) {
+        this.id = _id;
+        this.name = _name;
+        this.uName = _uname;
+        this.unit = (int)_unit;
+        this.weight = Utils.formatFloat(_weight);
+        this.total = Utils.formatInt(_unit * _weight);
+    }
+
+    public PackageInfo(int _id, String _name, String _uname, int _unit,
             float _weight) {
         this.id = _id;
         this.name = _name;
@@ -52,11 +62,11 @@ public class PackageInfo implements Parcelable {
         this.name = name;
     }
 
-    public float getUnit() {
+    public int getUnit() {
         return unit;
     }
 
-    public void setUnit(float unit) {
+    public void setUnit(int unit) {
         this.unit = unit;
     }
 
@@ -92,7 +102,7 @@ public class PackageInfo implements Parcelable {
     protected PackageInfo(Parcel source) {
         id = source.readInt();
         name = source.readString();
-        unit = source.readFloat();
+        unit = source.readInt();
         weight = source.readFloat();
         uName = source.readString();
         total = source.readInt();
@@ -107,7 +117,7 @@ public class PackageInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(name);
-        dest.writeFloat(unit);
+        dest.writeInt(unit);
         dest.writeFloat(weight);
         dest.writeString(uName);
         dest.writeInt(total);

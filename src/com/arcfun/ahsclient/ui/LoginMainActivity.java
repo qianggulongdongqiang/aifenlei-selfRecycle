@@ -1,8 +1,12 @@
 package com.arcfun.ahsclient.ui;
 
+import java.util.Arrays;
+
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -59,7 +63,7 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
     /** 工控机的数据 */
     private SparseArray<Float> mWeight = new SparseArray<Float>();
     private float mBaseWeight = 0f;
-    private byte[] mEpcData = null;
+    private String mEpcData = null;
     private boolean isFull = false;
 
     public static final String POSITION = "position";
@@ -207,11 +211,11 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
 
     private void handleEpcInfo(byte[] epcData) {
         if (epcData != null && epcData.length == Constancts.LENGTH_EPC) {
-            if (mEpcData != epcData && mPosition == FRAGMENT_LOGIN_RFID_1) {
-                mEpcData = epcData;
+            String code = StringTool.decodeBytes(epcData, 1, 13);
+            if (mEpcData != code && mPosition == FRAGMENT_LOGIN_RFID_1) {
+                mEpcData = code;
                 try {
-                    requestLogin(Utils.buildLoginJson(
-                            StringTool.decodeBytes(epcData, 1, 13), false));
+                    requestLogin(Utils.buildLoginJson(code, false));
                 } catch (Exception e) {
                     mEpcData = null;
                 }
@@ -337,7 +341,7 @@ public class LoginMainActivity extends AhsBaseActivity implements Listener,
             break;
         }
 
-        mTransaction.commit();
+        mTransaction.commitAllowingStateLoss();
     }
 
     /** must commit end */

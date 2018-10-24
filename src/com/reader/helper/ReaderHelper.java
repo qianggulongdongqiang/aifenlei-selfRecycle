@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import android.content.Context;
 
 import com.arcfun.ahsclient.utils.Constancts;
-import com.arcfun.ahsclient.utils.Utils;
 import com.reader.base.CMD;
 import com.reader.base.ReaderBase;
 
@@ -78,7 +77,7 @@ public class ReaderHelper {
 
                 @Override
                 public void analyData(byte[] btData) {
-                    if (Utils.DEBUG && mListener != null) {
+                    if (mListener != null) {
                         if (mType == Constancts.TYPE_DEV && btData[0] == CMD.BEG) {
                             mListener.onDEVInfo(type, btData);
                         } else if (mType == Constancts.TYPE_EPC) {

@@ -3,9 +3,9 @@ package com.arcfun.ahsclient.utils;
 import android.util.Log;
 
 public class LogUtils {
-    private static final String TAG = "zxz|";
+    private static final String TAG = "zxzahs|";
     private static final boolean DEBUG = Log.isLoggable("aifenx",
-            Log.DEBUG) || true;
+            Log.DEBUG);
 
     public static void d(String name, String msg) {
         if (DEBUG) {

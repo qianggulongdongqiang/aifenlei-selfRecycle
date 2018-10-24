@@ -57,7 +57,7 @@
             android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:contentDescription="@string/done"
-            android:src="@drawable/icon_uncompleted" />
+            android:src="@drawable/icon_ing" />
 
         <ImageView
             android:id="@+id/open_step1"

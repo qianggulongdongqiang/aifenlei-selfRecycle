@@ -1,0 +1,82 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ahs_bg" >
+
+    <include
+        android:id="@+id/top_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/actionbar_height"
+        android:layout_alignParentTop="true"
+        layout="@layout/ahs_top_title" />
+
+    <include
+        android:id="@+id/bottom_view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/actionbar_height"
+        android:layout_alignParentBottom="true"
+        layout="@layout/ahs_bottom_title" />
+
+    <LinearLayout
+        android:id="@+id/navigation_ll"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/login_back_height"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@id/top_view"
+        android:layout_marginEnd="@dimen/count_down_horizon"
+        android:layout_marginTop="@dimen/login_back_margin_top"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/login_time_start"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/open_count_down"
+            android:layout_width="@dimen/count_down_width"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/count_down_h_paddding"
+            android:layout_marginEnd="@dimen/count_down_v_paddding"
+            android:layout_marginStart="@dimen/count_down_v_paddding"
+            android:layout_marginTop="@dimen/count_down_h_paddding"
+            android:background="@drawable/ahs_count_down_bg"
+            android:paddingEnd="@dimen/count_down_v_paddding"
+            android:paddingStart="@dimen/count_down_v_paddding"
+            android:textColor="@color/count_down_text_color"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/login_time_end"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/actionbar_count_down_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fragement_first_height"
+        android:layout_below="@id/navigation_ll"
+        android:layout_marginEnd="@dimen/fragement_margin_horizon"
+        android:layout_marginStart="@dimen/fragement_margin_horizon" />
+
+    <FrameLayout
+        android:id="@+id/content2"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fragement_second_height"
+        android:layout_below="@id/content"
+        android:layout_marginEnd="@dimen/fragement_margin_horizon"
+        android:layout_marginStart="@dimen/fragement_margin_horizon"
+        android:layout_marginTop="@dimen/login_barcode_margin" />
+
+</RelativeLayout>

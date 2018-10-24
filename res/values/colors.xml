@@ -26,4 +26,5 @@
     <color name="viewfinder_laser">@color/white</color>
     <color name="viewfinder_mask">#60000000</color>
     <color name="msg_grey">#999999</color>
+    <color name="msg_hint">#777777</color>
 </resources>

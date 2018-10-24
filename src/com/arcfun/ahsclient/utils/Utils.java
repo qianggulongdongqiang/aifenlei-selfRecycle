@@ -62,7 +62,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
 public class Utils {
     public static final boolean DEBUG = Log.isLoggable("aifenx",
-            Log.DEBUG) || true;
+            Log.DEBUG);
 
     public static final int MAX_WELCOME_LIST = 5;
     private static final String TAG = "Utils";
@@ -83,8 +83,8 @@ public class Utils {
     public static final int BAUD_RATE_UHF = 115200;
 
     /** Serial Port */
-    public static final String SERIAL_PROT_1 = "/dev/ttyS2";//dev/ttyS2
-    public static final String SERIAL_PROT_2 = "/dev/ttyUSB0";//dev/ttyUSB0
+    public static final String SERIAL_PROT_1 = "/dev/ttyS2";//dev/ttyS1
+    public static final String SERIAL_PROT_2 = "/dev/ttyUSB0";//dev/ttyS3
     public static final String SERIAL_PROT_3 = "/dev/ttyUSB1";//dev/ttyUSB1
     public static final String SERIAL_PROT_4 = "/dev/ttyUSB2";//dev/ttyUSB2
 
@@ -549,6 +549,7 @@ public class Utils {
         JSONObject object = new JSONObject();
         try {
             object.put("token", token);
+            object.put("type", 0);
         } catch (Exception e) {
             LogUtils.e(TAG, "buildQrJson:" + e.toString());
         }
@@ -937,10 +938,12 @@ public class Utils {
     }
 
     public static float getWeight(String[] array) {
-        float weigth = 0f;
+        boolean isPositive = true;
+        isPositive = (array[3].equals("00") || (array[3].equals("01")));
+        float weigth = 0;
         weigth = Integer.parseInt(array[4] + array[5], 16)/100f;
         System.out.println("getWeight=" + weigth);
-        return weigth;
+        return weigth * (isPositive ? 1 : -1);
     }
 
     @Deprecated

@@ -88,8 +88,8 @@
     <string name="type_package1">"纸板箱"</string>
     <string name="type_package2">"袋装回收物"</string>
 
-    <string name="history_unit">"（单价：<xliff:g>%1$7.2f</xliff:g>积分/kg）"</string>
-    <string name="history_unit2">"（单价：<xliff:g>%1$7.2f</xliff:g>积分/个）"</string>
+    <string name="history_unit">"(<xliff:g>%1$d</xliff:g>积分/kg)"</string>
+    <string name="history_unit2">"(<xliff:g>%1$d</xliff:g>积分/个)"</string>
     <string name="history_weight">"<xliff:g>%1$7.2f</xliff:g>kg"</string>
     <string name="history_credit">"<xliff:g>%1$d</xliff:g>积分"</string>
 
@@ -104,7 +104,7 @@
 
     <string name="print_msg">"请将贴纸平整铁道投递袋外侧"</string>
     <string name="add_order_error">"还没有检测到重量哦，\n先投递再点完成按钮"</string>
-    <string name="machine_exception">"机器已满、请等待工作人员清运"</string>
+    <string name="machine_exception">"机器已满，请等待工作人员清运"</string>
     <string name="print_done">"已贴好"</string>
 
     <!-- add -->

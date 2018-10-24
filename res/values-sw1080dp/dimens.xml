@@ -16,6 +16,8 @@
     <dimen name="login_title_width2">333dp</dimen>
     <dimen name="fragement_margin_horizon">65dp</dimen>
     <dimen name="fragement_height">1100dp</dimen>
+    <dimen name="fragement_first_height">470dp</dimen>
+    <dimen name="fragement_second_height">690dp</dimen>
     <dimen name="fragement_qrcode_width">500dp</dimen>
     <dimen name="fragement_qrcode_height">390dp</dimen>
     <dimen name="fragement_switch_height">120dp</dimen>

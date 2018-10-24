@@ -27,6 +27,7 @@ public class AhsBaseActivity extends FragmentActivity implements
 
     protected static final int MSG_UPDATE_DEBUG = 1;
     protected static final int MSG_SCROLL_MSG = 10;
+    protected static final int MSG_DEV_SYNC = 11;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

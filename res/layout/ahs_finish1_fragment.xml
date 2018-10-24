@@ -1,0 +1,114 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ahs_fragment_bg"
+    android:orientation="vertical"
+    android:weightSum="15" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/result_open"
+            android:textColor="@color/login_title"
+            android:textSize="@dimen/fragment_title_size"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="11"
+        android:background="@drawable/bg_miniwhite1"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_account"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_owner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/dialog_black"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_ava_point"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_credit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="20" >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="7"
+                android:gravity="right"
+                android:text="@string/result_all_point"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_left_size" />
+
+            <TextView
+                android:id="@+id/finish_total"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="13"
+                android:gravity="left"
+                android:paddingStart="@dimen/fragment_title_h_padding"
+                android:textColor="@color/login_title"
+                android:textSize="@dimen/finish_right_size" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

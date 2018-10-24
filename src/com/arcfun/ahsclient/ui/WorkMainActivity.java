@@ -1,5 +1,7 @@
 package com.arcfun.ahsclient.ui;
 
+import java.util.Arrays;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,13 +21,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.arcfun.ahsclient.R;
+import com.arcfun.ahsclient.data.OrderResultInfo;
 import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.data.PackageInfo;
 import com.arcfun.ahsclient.data.ProductAndOwnerInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
-import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper;
 import com.arcfun.ahsclient.utils.CountDownTimerHelper.OnFinishListener;
+import com.arcfun.ahsclient.utils.Constancts;
 import com.arcfun.ahsclient.utils.LogUtils;
 import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
@@ -75,7 +78,8 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     public static final int FRAGMENT_EXIT = 100;
 
     private int mPosition = FRAGMENT_OPEN_DEFAULT;
-    public static final int PERIOD = 200 * 1000;
+    public static final int PERIOD_L = 200 * 1000;
+    public static final int PERIOD_S = 15 * 1000;
     public static final int INTERVAL = 1 * 1000;
     private String mToken;
     private OwnerInfo mOwnerInfo;
@@ -93,13 +97,6 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         mManager = getSupportFragmentManager();
         initData();
         initView();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                initSerialPort1();
-                openOrClosesHouse(true);
-            }
-        }).start();
     }
 
     private void openOrClosesHouse(boolean isOpen) {
@@ -118,7 +115,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         mStep3 = (ImageView) findViewById(R.id.open_step3);
 
         mCountDown = (Button) findViewById(R.id.open_count_down);
-        mHelper = new CountDownTimerHelper(mCountDown, PERIOD, INTERVAL);
+        mHelper = new CountDownTimerHelper(mCountDown, PERIOD_L, INTERVAL);
         mHelper.setOnFinishListener(this);
         mBack.setOnClickListener(this);
         setMachineType(mMachineType);
@@ -146,8 +143,8 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
                 .getSignature(getApplicationContext());
         mLable.setText(getString(R.string.title_des4, lable));
         mHelper.start();
-        mReaderHelper1.setListener(this);
-        mBase = ((AhsApplication) getApplication()).getWeight();;
+        initSerialPort();
+        mBase = ((AhsApplication) getApplication()).getWeight();
         LogUtils.d(TAG, "onResume base= " + mBase);
     }
 
@@ -156,6 +153,23 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
         super.onPause();
         mHelper.stop();
         mReaderHelper1.setListener(null);
+    }
+
+    private void initSerialPort() {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                initSerialPort1();
+                openOrClosesHouse(true);
+                LogUtils.d(TAG, "initSerialPort");
+                return null;
+            }
+
+            protected void onPostExecute(Void result) {
+                mReaderHelper1.setListener(WorkMainActivity.this);
+            }
+        }.execute();
     }
 
     @Override
@@ -235,14 +249,14 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
     private void updateProgress(int type) {
         switch (type) {
         case 0:
-            mStep2.setImageResource(R.drawable.icon_uncompleted);
+            mStep2.setImageResource(R.drawable.icon_ing);
             mStep2End.setImageResource(R.drawable.line2);
             mStep3.setImageResource(R.drawable.icon_uncompleted);
             break;
         case 1:
             mStep2.setImageResource(R.drawable.icon_completed);
             mStep2End.setImageResource(R.drawable.line1);
-            mStep3.setImageResource(R.drawable.icon_uncompleted);
+            mStep3.setImageResource(R.drawable.icon_ing);
             break;
         case 2:
             mStep2.setImageResource(R.drawable.icon_completed);
@@ -366,6 +380,11 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
 
     @Override
     public void onFinish() {
+        try {
+            mReaderHelper1.getReader().sendOpenHouse(false);
+        } catch (Exception e) {
+            Utils.showMsg(this, "onFinish close:" + e.toString());
+        }
         if (mPosition == FRAGMENT_BOTTLE_IN ||
                 mPosition == FRAGMENT_PACKAGE_IN) {
             if (mOwnerInfo != null && mOwnerInfo.getVendor() > 0) {
@@ -374,11 +393,6 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             }
         }
         onBackPressed();
-        try {
-            mReaderHelper1.getReader().sendOpenHouse(false);
-        } catch (Exception e) {
-            Utils.showMsg(this, "onFinish close:" + e.toString());
-        }
     }
 
     @Override
@@ -408,6 +422,10 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             } catch (Exception e) {
             }
         } else if (index == FRAGMENT_FINISH || index == FRAGMENT_GUEST_FINISH) {
+            try {
+                mReaderHelper1.getReader().sendOpenHouse(false);
+            } catch (Exception e) {
+            }
             updateProgress(2);
         }
 
@@ -429,14 +447,13 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             if (mOwnerInfo != null) {
                 mPackageInfo.setWeight(mOwnerInfo.getVendor());
             }
-            if (mPackageResultFragment == null) {
-                mPackageResultFragment = new ResultPackageFragment(this,
-                        mPackageInfo, mOwnerInfo, index);
-                mTransaction.add(R.id.content, mPackageResultFragment);
-            } else {
-                mPackageResultFragment.setPackageInfo(mPackageInfo, mOwnerInfo);
-                mTransaction.show(mPackageResultFragment);
-            }
+            Intent intent = new Intent(WorkMainActivity.this,
+                    FinishMainActivity.class);
+            intent.putExtra("package_info", mPackageInfo);
+            intent.putExtra("owner_info", mOwnerInfo);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();
             break;
         case FRAGMENT_BOTTLE_IN:
             if (mBottleOpenFragment == null) {
@@ -467,6 +484,11 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             }
             break;
         case FRAGMENT_GUEST_FINISH:
+            mBack.setVisibility(View.GONE);
+            mHelper.cancel();
+            mHelper = new CountDownTimerHelper(mCountDown, PERIOD_S, INTERVAL);
+            mHelper.setOnFinishListener(this);
+            mHelper.start();
             if (mGuestFinishFragment == null) {
                 mGuestFinishFragment = new GuestFinshFragment(this, index);
                 mTransaction.add(R.id.content, mGuestFinishFragment);
@@ -476,7 +498,7 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             break;
         }
 
-        mTransaction.commit();
+        mTransaction.commitAllowingStateLoss();
     }
 
     /** must commit end */
@@ -530,7 +552,6 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
             @Override
             protected String doInBackground(String... params) {
                 byte[] data = HttpRequest.sendPost(params[0], json);
-                LogUtils.d(TAG, "addOrder data =" + data);
                 if (data == null) {
                     return null;
                 }
@@ -541,12 +562,20 @@ public class WorkMainActivity extends AhsBaseActivity implements Listener,
 
             @Override
             protected void onPostExecute(String result) {
+                OrderResultInfo info = null;
                 if (result != null) {
+                    info = Utils.parseResultData(result);
+                    if (mOwnerInfo != null) {
+                        mOwnerInfo.setScore(info.getUserScore());
+                    } else {
+                        mOwnerInfo = new OwnerInfo(0, "Guest",
+                                mPackageInfo.getTotal(), "");
+                    }
                     if (mOwnerInfo.getId() > 0) {
-                        onUpdate(FRAGMENT_FINISH, null);
+                        onUpdate(FRAGMENT_PACKAGE_ENSURE, mOwnerInfo);
                         mHelper.start();
                     } else {
-                        onUpdate(FRAGMENT_GUEST_FINISH, null);
+                        onUpdate(FRAGMENT_GUEST_FINISH, mOwnerInfo);
                     }
                 }
             }

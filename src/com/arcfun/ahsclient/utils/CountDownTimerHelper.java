@@ -62,6 +62,12 @@ public class CountDownTimerHelper {
         mTimer.start();
     }
 
+    public void cancel() {
+        if (mTimer != null) {
+            mTimer.cancel();
+        }
+    }
+
     public void stop() {
         if (mTimer != null) {
             mTimer.cancel();

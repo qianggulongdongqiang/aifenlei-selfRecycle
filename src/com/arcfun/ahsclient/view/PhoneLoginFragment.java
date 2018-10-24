@@ -16,6 +16,7 @@ import com.arcfun.ahsclient.R;
 import com.arcfun.ahsclient.data.OwnerInfo;
 import com.arcfun.ahsclient.net.HttpRequest;
 import com.arcfun.ahsclient.utils.LogUtils;
+import com.arcfun.ahsclient.utils.SharedPreferencesUtils;
 import com.arcfun.ahsclient.utils.Utils;
 import com.arcfun.ahsclient.view.NumKeyBoard.OnInputDoneListener;
 
@@ -65,6 +66,9 @@ public class PhoneLoginFragment extends BaseLoginFragment implements
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         LogUtils.d(TAG, "onActivityCreated mIndex = " + mIndex);
+        if (SharedPreferencesUtils.getDebug(getActivity())) {
+            mInputNumber.setText("18521365719");
+        }
     }
 
     @Override

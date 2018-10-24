@@ -16,6 +16,8 @@
     <dimen name="login_title_width2">200dp</dimen>
     <dimen name="fragement_margin_horizon">30dp</dimen>
     <dimen name="fragement_height">400dp</dimen>
+    <dimen name="fragement_first_height">200dp</dimen>
+    <dimen name="fragement_second_height">220dp</dimen>
     <dimen name="fragement_qrcode_width">250dp</dimen>
     <dimen name="fragement_qrcode_height">160dp</dimen>
     <dimen name="fragement_switch_height">60dp</dimen>
@@ -138,7 +140,7 @@
     <dimen name="left_msg_size">18sp</dimen>
     <dimen name="left_small_size">21sp</dimen>
     <dimen name="left_big_size">28sp</dimen>
-    <dimen name="right_msg_size">25sp</dimen>
+    <dimen name="right_msg_size">12sp</dimen>
     <dimen name="dialog_weight_left">18sp</dimen>
     <dimen name="dialog_weight_right">18sp</dimen>
     <dimen name="dialog_welcome_title">16sp</dimen>
